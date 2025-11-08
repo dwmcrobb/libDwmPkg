@@ -140,6 +140,51 @@ namespace Dwm {
       (append_to_vec(vars, get_vars_in_ns<T,NSes>()), ...);
       return vars;
     }
+
+    template<class T, template<class...> class U>
+    inline constexpr bool is_instance_of_v = std::false_type{};
+    
+    template<template<class...> class U, class... Vs>
+    inline constexpr bool is_instance_of_v<U<Vs...>,U> = std::true_type{};
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    template <std::meta::info T, std::meta::info NS>
+    constexpr auto get_templates_of_in_ns()
+    {
+      using namespace std::meta;
+      
+      std::vector<std::pair<std::string,std::string>>  vars;
+      constexpr auto ctx = access_context::unchecked();
+      template for (constexpr auto mem :
+                      define_static_array(members_of(NS, ctx))) {
+        if constexpr (is_namespace(mem)) {
+          append_to_vec(vars,get_templates_of_in_ns<T,mem>());
+        }
+        else {
+          if constexpr (is_variable(mem)) {
+            using  memType = typename[:remove_cvref(type_of(mem)):];
+            if constexpr (has_template_arguments(type_of(mem))
+                          && template_of(type_of(mem)) == T) {
+              vars.push_back({FQN<mem>(),std::string([:mem:].view())});
+            }
+          }
+        }
+      }
+      return vars;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    template <std::meta::info T, std::meta::info ...NSes>
+    constexpr auto get_templates_of_in_nses()
+    {
+      std::vector<std::pair<std::string,std::string>>  vars;
+      (append_to_vec(vars, get_templates_of_in_ns<T,NSes>()), ...);
+      return vars;
+    }
     
     //------------------------------------------------------------------------
     //!  Returns a vector of pair<string,Dwm::Pkg::Info> holding all
@@ -149,7 +194,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     template <std::meta::info ...NSes>
     constexpr auto get_packages()
-    { return get_vars_in_nses<Dwm::Pkg::Info,NSes...>(); }
+    // { return get_vars_in_nses<Dwm::Pkg::Info,NSes...>(); }
+    { return get_templates_of_in_nses<^^Dwm::Pkg::Info,NSes...>(); }
 
 #if 0
     //------------------------------------------------------------------------

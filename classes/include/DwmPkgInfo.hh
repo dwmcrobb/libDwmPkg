@@ -49,175 +49,76 @@
 #include <iostream>
 #include <source_location>
 
-#define DWM_PKG_MK_LINE_ARG(x) DWM_PKG_MK_LINE_ARG2(x)
-#define DWM_PKG_MK_LINE_ARG2(x) #x
-#define DWM_PKG_MK_ARGS(n,v,c)  #n, #v, #c, __FILE_NAME__,                   \
-                                "@(#) " #n "-" #v " \xC2\xA9 " #c  " "       \
-                                __DATE__ " " __TIME__ " " __FILE_NAME__ ":"  \
-                                DWM_PKG_MK_LINE_ARG(__LINE__),               \
-                                DWM_PKG_MK_LINE_ARG(__LINE__)
+#include "DwmPkgSegmentedLiteral.hh"
 
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
 namespace Dwm {
-  
+
   namespace Pkg {
 
-    //--------------------------------------------------------------------------
-    //!  There is some slight trickery here.  I don't want to embed more
-    //!  bytes in a binary than necessary.  I want a single string literal
-    //!  embedded (_id), and just store offsets and lengths for each portion
-    //!  of interest in _id: _name, _version, _copyright, _date, _time, _file
-    //!  and _line.  Clang and gcc have __FILE_NAME__, but AFAIK MSVC does not.
-    //!  This won't compile with MSVC, but theoretically you could change
-    //!  the DWM_PKG_MK_ARGS macro to use __FILE__ instead of __FILE_NAME__,
-    //!  you'll just get a much longer embedded _id.  I wish __FILE_NAME__
-    //!  was standardized, since many of us need it.
-    //!
-    //!  The other trickery is that the constructor is a template.  This is
-    //!  only so I can avoid using strlen() and instead automagically get
-    //!  the size of the passed-in string literals, without being tripped up
-    //!  by embedded nulls in the string literals.  Of course, ultimately
-    //!  this means the constructor _must_ be called with string literals,
-    //!  which is exactly what I want.  And if you intentionally embed nulls
-    //!  in any of the constructor arguments... you'll get what you'd expect
-    //!  (it's highly discouraged).
-    //!
-    //!  The easy way to construct an Info is to use the DWM_PKG_MK_ARGS
-    //!  macro to build the constructor's arguments.  For a package named
-    //!  'foobar' with version 1.2.3, you could put this in your main
-    //!  header file (for example, 'foobar.hh'), inside an appropriate
-    //!  namespace:
-    //!
-    //!  inline const Dwm::Pkg::Info info(DWM_PKG_MK_ARGS(foobar,1.2.3,rfdm.com));
-    //!
-    //!  This would embed a string of this form in the binary:
-    //!
-    //!  @(#) foobar-1.2.3 mcplex.net Nov  6 2025 17:33:57 foobar.hh:25
-    //!
-    //!  I'm using the @(#) prefix to make it possible to find this string
-    //!  with the old 'what' utility as well as with 'dwmwhat'.
-    //--------------------------------------------------------------------------
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    template <std::size_t N, std::size_t V, std::size_t C, std::size_t D,
+              std::size_t T, std::size_t F>
     class Info
     {
     public:
-      constexpr Info() = delete;
-
-#if 0
-      constexpr Info(Info &&) = default;
-      constexpr Info(const Info &) = default;
-      constexpr Info & operator = (Info &) = default;
-      constexpr Info & operator = (Info &&) = default;
-#endif
-
-      //----------------------------------------------------------------------
-      //!  We're sort of abusing the type system here to preserve the
-      //!  size of each argument.  Each argument is a string literal, and
-      //!  we can capture the length of each string literal with template
-      //!  parameter deduction at compile time.
-      //----------------------------------------------------------------------
-      template <size_t N, size_t V, size_t C, size_t F, size_t I, size_t L>
       constexpr Info(const char (&name)[N], const char (&version)[V],
-                     const char (&copyright)[C], const char (&file)[F],
-                     const char (&id)[I], const char (&line)[L])
-          : _id(id), _idlen(I-1)
-      {
-        static_assert(I < 0x100);
-        _name[0] = strlen("@(#) ");
-        _name[1] = N-1;
-        _version[0] = _name[0] + _name[1] + 1;
-        _version[1] = V-1;
-        _copyright[0] = _version[0] + _version[1] + 1;
-        _copyright[1] = (C-1) + strlen("\xC2\xA9 ");
-        _date[0] = _copyright[0] + _copyright[1] + 1;
-        _date[1] = strlen(__DATE__);
-        _time[0] = _date[0] + _date[1] + 1;
-        _time[1] = strlen(__TIME__);
-        _file[0] = _time[0] + _time[1] + 1;
-        _file[1] = F - 1;
-        _line[0] = _file[0] + _file[1] + 1;
-        _line[1] = L - 1;
-      }
+                     const char (&cpyright)[C], const char (&date)[D],
+                     const char (&time)[T], const char (&file)[F])
+          : _sl(' ',"@(#)",name,version,cpyright,date,time,file)
+      {}
       
-      constexpr std::string_view name() const {
-        return std::string_view(_id + _name[0], _name[1]);
-      }
-      constexpr std::string_view version() const {
-        return std::string_view(_id + _version[0], _version[1]);
-      }
-      constexpr std::string_view copyright() const {
-        return std::string_view(_id + _copyright[0], _copyright[1]);
-      }
-      constexpr std::string_view date() const {
-        return std::string_view(_id + _date[0], _date[1]);
-      }
-      constexpr std::string_view time() const {
-        return std::string_view(_id + _time[0], _time[1]);
-      }
-      constexpr std::string_view id() const {
-        return std::string_view(_id, _idlen);
-      }
-      constexpr std::string_view file() const {
-        return std::string_view(_id + _file[0], _file[1]);
-      }
-      constexpr uint32_t line() const {
-        char  *endp = (char *)(_id + _line[0] + _line[1]);
-        return std::strtoul(_id + _line[0], &endp, 10);
-      }
+      constexpr std::string_view name() const noexcept
+      { return _sl.nth(1); }
       
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      friend std::ostream & operator << (std::ostream & os, const Info & p)
-      {
-        if (p._id) {
-          os << p.name() << ' ' << p.version() << ' ' << p.copyright() << ' '
-             << p.date() << ' ' << p.time() << " {" << p.file() << ':'
-             << p.line() << '}';
-        }
-        return os;
-      }
+      constexpr std::string_view version() const noexcept
+      { return _sl.nth(2); }
       
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      std::ostream & print_json(std::ostream & os) const
-      {
-        return os << as_json();
-      }
+      constexpr std::string_view copyright() const noexcept
+      { return _sl.nth(3); }
       
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      std::string as_json() const
+      constexpr std::string_view date() const noexcept
+      { return _sl.nth(4); }
+      
+      constexpr std::string_view time() const noexcept
+      { return _sl.nth(5); }
+      
+      constexpr std::string_view file() const noexcept
+      { return _sl.nth(6); }
+      
+      constexpr std::string as_json() const noexcept
       {
-        if (_id) {
-          return "{\"name\": \"" + std::string(name())
-            + "\", \"version\": \"" + std::string(version())
-            + "\", \"copyright\": \"" + std::string(copyright())
-            + "\", \"date\": \"" + std::string(date())
-            + "\", \"time\": \"" + std::string(time())
-            + "\", \"id\": \"" + std::string(id())
-            + "\", \"file\": \"" + std::string(file())
-            + "\", \"line\": " + std::to_string(line()) + '}';
-        }
-        return std::string();
+        return "{\"name\": \"" + std::string(name())
+          + "\", \"version\": \"" + std::string(version())
+          + "\", \"copyright\": \"" + std::string(copyright())
+          + "\", \"date\": \"" + std::string(date())
+          + "\", \"time\": \"" + std::string(time())
+          + "\", \"id\": \"" + std::string(_sl)
+          + "\", \"file\": \"" + std::string(file()) + "\"}";
       }
+
+      consteval operator std::string_view () const noexcept
+      { return _sl; }
+
+      consteval std::string_view view() const noexcept
+      { return std::string_view(_sl.view().data() + sizeof("@(#)"),
+                                _sl.view().size() - sizeof("@(#)")); }
+        
+      constexpr size_t size_of_seg_lens() const noexcept
+      { return _sl.size_of_seg_lengths(); }
+
+  constexpr size_t num_segments() const noexcept
+      { return _sl.num_segments(); }
       
     private:
-      const char   *_id;
-      uint8_t       _idlen;
-      uint8_t       _name[2];
-      uint8_t       _version[2];
-      uint8_t       _copyright[2];
-      uint8_t       _date[2];
-      uint8_t       _time[2];
-      uint8_t       _file[2];
-      uint8_t       _line[2];
+      SegmentedLiteral<7,sizeof("@(#)")+N+V+C+D+T+F-1>  _sl;
     };
-
-    inline const Info     info(DWM_PKG_MK_ARGS(DwmPkg,0.0.42,Daniel McRobb 2025 \xF0\x9F\x8E\x83));
+    
+    inline constexpr Info
+    info("DwmPkg","0.0.42",
+         "Copyright \xC2\xA9 Daniel McRobb \xF0\x9F\x8E\x83 2025",
+         __DATE__, __TIME__, __FILE_NAME__);
     
   }  // namespace Pkg
 

@@ -61,38 +61,35 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  The encapsulated data.
       //----------------------------------------------------------------------
-      std::array<char, N> data;
-      
-      //----------------------------------------------------------------------
-      //!  Construct from a C-style string literal using a non-type template
-      //!  parameter pack for characters.  A bit ugly but works and the way
-      //!  many others have done this.
-      //----------------------------------------------------------------------
-      template <std::size_t... Is>
-      constexpr StringLiteral(const char (&s)[N], std::index_sequence<Is...>)
-          : data{{s[Is]...}}
-      { }
+      char         data[N];
+      std::size_t  size = N;
       
       //----------------------------------------------------------------------
       //!  Construct from string literal input.  Template parameter N is
       //!  deduced.
       //----------------------------------------------------------------------
-      constexpr StringLiteral(const char (&s)[N])
-          : StringLiteral(s, std::make_index_sequence<N>{})
-      {}
+      constexpr StringLiteral(const char (&s)[N]) noexcept
+      {
+        std::ranges::copy_n(s, N, data);
+      }
       
       //----------------------------------------------------------------------
       //!  Convert to std::string_view, excluding the null termination.
       //----------------------------------------------------------------------
       constexpr operator std::string_view() const
-      { return std::string_view(data.data(), N - 1); }
+      { return std::string_view(data, N - 1); }
 
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      constexpr size_t size() const  { return N - 1; }
     };
 
+    //------------------------------------------------------------------------
+    //!  UNUSED
+    //------------------------------------------------------------------------
+    template <StringLiteral SL>
+    consteval auto get_static_data() noexcept -> const char (&)[SL.size]
+    {
+      return SL.data;
+    }
+    
   }  // namespace Pkg
 
 }  // namespace Dwm

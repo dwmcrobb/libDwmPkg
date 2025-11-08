@@ -66,6 +66,19 @@ namespace Crap {
   }
 }
 
+#define JACKOLANTERN "\xF0\x9F\x8E\x83"
+#define COPYRTSYMBOL "\xC2\xA9"
+#define DWMWHAT_COPYRIGHT "Copyright " COPYRTSYMBOL " Daniel McRobb " \
+  JACKOLANTERN " 2025"
+
+namespace Dwm {
+  namespace dwmwhat {
+    inline constexpr Dwm::Pkg::Info
+    info("dwmwhat","1.0.0",DWMWHAT_COPYRIGHT,
+         __DATE__,__TIME__,__FILE_NAME__);
+  }
+}
+
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
@@ -163,14 +176,21 @@ int main(int argc, char *argv[])
 #if defined(DWM_PKG_CAN_USE_REFLECTION)
     auto pkgs = Dwm::Pkg::get_packages<^^Dwm>();
     for (const auto & pkg : pkgs) {
-      std::cout << pkg.second << '\n';
+      std::cout << pkg.second << '\n'; // << pkg.second.as_json() << '\n';
     }
 #else
-    std::cout << Dwm::Pkg::info << '\n';
+    std::cout << Dwm::Pkg::info << '\n'; // << Dwm::Pkg::info.as_json() << '\n';
 #endif
     return 0;
   }
 
+#if 0
+  Dwm::Pkg::StringLiteral l("left_literal");
+  Dwm::Pkg::StringLiteral r("right_literal");
+  std::cout << std::string_view(l+r);
+#endif
+
+#if 0
   auto  vars = Dwm::Pkg::get_vars_in_ns<"Pkg",^^::, Dwm::Pkg::Info,
                                         std::string, const char *>();
   for (const auto & var : vars) {
@@ -190,11 +210,7 @@ int main(int argc, char *argv[])
     }, var.second);
     std::cout << '\n';
   }
-
-  std::cout << "&Dwm::Pkg::info: " << &Dwm::Pkg::info << ' '
-            << " Dwm::Pkg::info.id().data(): "
-            << std::hex << (void *)Dwm::Pkg::info.id().data()
-            << std::dec << '\n';
+#endif
   
   int  rc = 0;
   for (int arg = optind; arg < argc; ++arg) {
