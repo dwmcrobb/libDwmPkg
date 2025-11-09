@@ -40,6 +40,7 @@
 //---------------------------------------------------------------------------
 
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <limits>
 #include <numeric>
@@ -75,7 +76,7 @@ namespace Dwm {
     //!     the compiler is aware of a single string literal ("constexpr
     //!     all the things", Jason Turner).
     //------------------------------------------------------------------------
-    template <std::size_t NumSegs, std::size_t NumChars>
+    template <std::size_t DelimLen, std::size_t NumSegs, std::size_t NumChars>
     class SegmentedLiteral
     {
     public:
@@ -90,16 +91,18 @@ namespace Dwm {
       //----------------------------------------------------------------------
       //!  
       //----------------------------------------------------------------------
-      template <std::size_t F, std::size_t ...Ns>
-      consteval SegmentedLiteral(const char delim, const char (&f)[F],
+      template <std::size_t D, std::size_t F, std::size_t ...Ns>
+      consteval SegmentedLiteral(const char (&delim)[D], const char (&f)[F],
                                  const char (&...s)[Ns])
       {
-        static_assert((NumChars - 1) <= std::numeric_limits<SegLenType>::max());
-        
+        static_assert((NumChars) <= std::numeric_limits<SegLenType>::max());
+
+        //  'f' is just 'first'
         auto  it = std::ranges::copy_n(f,F-1,_buffer).out;
         std::size_t  si = 0;
         seglengths[si++] = F-1;
-        ((*it++ = delim, seglengths[si++] = Ns-1,
+        ((seglengths[si++] = Ns-1,
+          it = std::ranges::copy_n(delim,D-1,it).out,
           it = std::ranges::copy_n(s,Ns-1,it).out), ...);
       }
       
@@ -132,9 +135,10 @@ namespace Dwm {
       //----------------------------------------------------------------------
       constexpr std::string_view nth(std::size_t n) const noexcept
       {
-        static_assert(n < NumSegs);
+        assert(n < NumSegs);
         std::size_t  off = std::accumulate(seglengths, &seglengths[n], 0);
-        return std::string_view(_buffer + off + n, seglengths[n]);
+        off += (n - 1) * delimLen;
+        return std::string_view(_buffer + off, seglengths[n]);
       }
       
       //----------------------------------------------------------------------
@@ -147,6 +151,7 @@ namespace Dwm {
       char         _buffer[NumChars] {};
       std::size_t  size = NumChars;
       SegLenType   seglengths[NumSegs] {};
+      std::size_t  delimLen = DelimLen;
     };
 
     //------------------------------------------------------------------------
@@ -154,9 +159,9 @@ namespace Dwm {
     //!  number of segments and the total characters needed to store the
     //!  segments so we can correctly instantiate the template.
     //------------------------------------------------------------------------
-    template <std::size_t ...Ns>
-    SegmentedLiteral(const char delim, const char (&...s)[Ns])
-      -> SegmentedLiteral<sizeof...(Ns),((Ns) + ...) - 1>;
+    template <std::size_t D, std::size_t ...Ns>
+    SegmentedLiteral(const char (&delim)[D], const char (&...s)[Ns])
+      -> SegmentedLiteral<D-1,sizeof...(Ns),((Ns-1) + ...) + ((D-1)*(sizeof...(Ns)-1))>;
     
   }  // namespace Pkg
 
