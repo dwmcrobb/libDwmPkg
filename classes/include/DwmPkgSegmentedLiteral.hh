@@ -155,9 +155,16 @@ namespace Dwm {
     };
 
     //------------------------------------------------------------------------
-    //!  Deduction guide.  This is critical, since we need to know the
-    //!  number of segments and the total characters needed to store the
-    //!  segments so we can correctly instantiate the template.
+    //!  Deduction guide.  This is critical, since we need to deduce DelimLen,
+    //!  NumSegs and NumChars to instantiate the template.  We deduce
+    //!  DelimLen from the length of delim, minus 1 (remove null).  We
+    //!  deduce the number off segments from the number of variadic
+    //!  arguments (sizeof...(Ns)).  To deduce NumChars, we add up the
+    //!  length of all of the variadic arguments (minus 1 for each to ignore
+    //!  null termination).  We then add the number of characters we need to
+    //!  store delimiter strings.  Here we need D-1 characters for each,
+    //!  and we need (sizeof...(Ns) - 1) of them (they only go between
+    //!  segments, not before the first segment or after the last segment).
     //------------------------------------------------------------------------
     template <std::size_t D, std::size_t ...Ns>
     SegmentedLiteral(const char (&delim)[D], const char (&...s)[Ns])
