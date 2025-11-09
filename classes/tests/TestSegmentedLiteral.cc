@@ -40,8 +40,13 @@
 //---------------------------------------------------------------------------
 
 #include <cassert>
+#include <iostream>
 
 #include "DwmPkgSegmentedLiteral.hh"
+
+inline constexpr const Dwm::Pkg::SegmentedLiteral
+TestSegmentedLiteral(" ","@(#)","TestSegmentedLiteral","",
+                     "Copyright Daniel McRobb 2025",__DATE__,__TIME__);
 
 int main(int argc, char *argv[])
 {
@@ -64,6 +69,11 @@ int main(int argc, char *argv[])
   assert(emptyDelim.nth(0) == "abc");
   assert(emptyDelim.nth(1) == "defg");
   assert(emptyDelim.nth(2) == "hijkl");
+
+  assert(TestSegmentedLiteral.nth(0) == "@(#)");
+  assert(TestSegmentedLiteral.nth(1) == "TestSegmentedLiteral");
+
+  std::cout << TestSegmentedLiteral.view() << '\n';
   
   return 0;
 }

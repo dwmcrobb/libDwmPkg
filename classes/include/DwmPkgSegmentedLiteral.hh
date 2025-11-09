@@ -137,7 +137,7 @@ namespace Dwm {
       {
         assert(n < NumSegs);
         std::size_t  off = std::accumulate(seglengths, &seglengths[n], 0);
-        off += (n - 1) * delimLen;
+        off += (n - 0) * delimLen;
         return std::string_view(_buffer + off, seglengths[n]);
       }
       

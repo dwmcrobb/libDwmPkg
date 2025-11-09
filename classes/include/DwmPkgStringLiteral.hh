@@ -42,6 +42,7 @@
 #ifndef _DWMPKGSTRINGLITERAL_HH_
 #define _DWMPKGSTRINGLITERAL_HH_
 
+#include <algorithm>
 #include <array>
 #include <string_view>
 #include <utility>  // for std::index_sequence

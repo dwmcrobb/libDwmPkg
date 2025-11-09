@@ -62,12 +62,21 @@
 #include "DwmPkgStringLiteral.hh"
 #include "DwmPkgInfo.hh"
 
-#if defined(DWM_PKG_CAN_USE_REFLECTION)
-
 namespace Dwm {
 
   namespace Pkg {
 
+#define DWM_PKG_MK_LINE_ARG(x) DWM_PKG_MK_LINE_ARG2(x)
+#define DWM_PKG_MK_LINE_ARG2(x) #x
+
+    inline constexpr const Info __attribute__((used))
+    info("DwmPkg","0.0.42",
+         "Copyright " DWM_PKG_COPYRIGHT "  Daniel McRobb 2025 "
+         DWM_PKG_JACKOLANTERN DWM_PKG_GHOST,
+         __DATE__, __TIME__,
+         DWM_PKG_OPEN_FOLDER " " __FILE_NAME__ ":" DWM_PKG_MK_LINE_ARG(__LINE__));
+
+#if defined(DWM_PKG_CAN_USE_REFLECTION)
     
     //------------------------------------------------------------------------
     //!  Returns a fully qualified name for the given reflection @c info.
@@ -155,7 +164,8 @@ namespace Dwm {
     {
       using namespace std::meta;
       
-      std::vector<std::pair<std::string,std::string>>  vars;
+      std::vector<std::pair<std::string,
+                            std::pair<std::string,std::string>>>  vars;
       constexpr auto ctx = access_context::unchecked();
       template for (constexpr auto mem :
                       define_static_array(members_of(NS, ctx))) {
@@ -167,7 +177,10 @@ namespace Dwm {
             using  memType = typename[:remove_cvref(type_of(mem)):];
             if constexpr (has_template_arguments(type_of(mem))
                           && template_of(type_of(mem)) == T) {
-              vars.push_back({FQN<mem>(),std::string([:mem:].view())});
+              // vars.push_back({FQN<mem>(),std::string([:mem:].view())});
+              vars.push_back({FQN<mem>(),
+                              {std::string([:mem:].view()),
+                               std::string([:mem:].as_json())}});
             }
           }
         }
@@ -181,8 +194,47 @@ namespace Dwm {
     template <std::meta::info T, std::meta::info ...NSes>
     constexpr auto get_templates_of_in_nses()
     {
-      std::vector<std::pair<std::string,std::string>>  vars;
+      std::vector<std::pair<std::string,std::pair<std::string,std::string>>>  vars;
       (append_to_vec(vars, get_templates_of_in_ns<T,NSes>()), ...);
+      return vars;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    template <std::meta::info T, std::meta::info NS>
+    constexpr auto get_templates_of_in_ns_2()
+    {
+      using namespace std::meta;
+      
+      std::vector<std::pair<std::string,std::meta::info>>  vars;
+      constexpr auto ctx = access_context::unchecked();
+      template for (constexpr auto mem :
+                      define_static_array(members_of(NS, ctx))) {
+        if constexpr (is_namespace(mem)) {
+          append_to_vec(vars,get_templates_of_in_ns_2<T,mem>());
+        }
+        else {
+          if constexpr (is_variable(mem)) {
+            using  memType = typename[:remove_cvref(type_of(mem)):];
+            if constexpr (has_template_arguments(type_of(mem))
+                          && template_of(type_of(mem)) == T) {
+              vars.push_back({FQN<mem>(),mem});
+            }
+          }
+        }
+      }
+      return vars;
+    }
+
+    //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    template <std::meta::info T, std::meta::info ...NSes>
+    constexpr auto get_templates_of_in_nses_2()
+    {
+      std::vector<std::pair<std::string,std::meta::info>>  vars;
+      (append_to_vec(vars, get_templates_of_in_ns_2<T,NSes>()), ...);
       return vars;
     }
     
@@ -194,8 +246,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     template <std::meta::info ...NSes>
     constexpr auto get_packages()
-    // { return get_vars_in_nses<Dwm::Pkg::Info,NSes...>(); }
     { return get_templates_of_in_nses<^^Dwm::Pkg::Info,NSes...>(); }
+    // { return get_templates_of_in_nses_2<^^Dwm::Pkg::Info,NSes...>(); }
 
 #if 0
     //------------------------------------------------------------------------
@@ -288,12 +340,11 @@ namespace Dwm {
       }
       return vars;
     }
+
+#endif  // defined(DWM_PKG_CAN_USE_REFLECTION)
     
   }  // namespace Pkg
 
 }  // namespace Dwm
-
-
-#endif
 
 #endif  // _DWMPKG_HH_

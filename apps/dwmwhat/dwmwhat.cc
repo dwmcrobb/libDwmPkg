@@ -57,25 +57,23 @@ extern "C" {
 
 using namespace std;
 
-static bool g_shortOption = false;
-
+#if 0
 namespace Crap {
   namespace Pkg {
     const char  *p = "raw pointer to char";
     std::string  junk("junk content");
   }
 }
+#endif
 
-#define JACKOLANTERN "\xF0\x9F\x8E\x83"
-#define COPYRTSYMBOL "\xC2\xA9"
-#define DWMWHAT_COPYRIGHT "Copyright " COPYRTSYMBOL " Daniel McRobb " \
-  JACKOLANTERN " 2025"
+#define DWMWHAT_COPYRIGHT "Copyright " DWM_PKG_COPYRIGHT \
+  "  Daniel McRobb 2025 " DWM_PKG_JACKOLANTERN DWM_PKG_GHOST
 
 namespace Dwm {
   namespace dwmwhat {
-    inline constexpr Dwm::Pkg::Info
-    info("dwmwhat","1.0.0",DWMWHAT_COPYRIGHT,
-         __DATE__,__TIME__,__FILE_NAME__);
+    inline constexpr const Dwm::Pkg::Info __attribute__((used))
+    info("dwmwhat","1.0.0",DWMWHAT_COPYRIGHT,__DATE__,__TIME__,
+         DWM_PKG_OPEN_FOLDER " " __FILE_NAME__ ":" DWM_PKG_MK_LINE_ARG(__LINE__));
   }
 }
 
@@ -144,6 +142,33 @@ static vector<string> FindSccsStrings(const char * map, size_t size)
   return rc;
 }
 
+#if defined(DWM_PKG_CAN_USE_REFLECTION)
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void DumpPackagesJson()
+{
+  auto pkgs = Dwm::Pkg::get_packages<^^Dwm>();
+  if (! pkgs.empty()) {
+    cout << "[\n";
+    bool  first = true;
+    for (auto & pkg : pkgs) {
+      if (! first) {
+        cout << ",\n  " << pkg.second.second;
+      }
+      else {
+        cout << "  " << pkg.second.second;
+        first = false;
+      }
+    }
+    cout << "\n]\n";
+  }
+  return;
+}
+
+#endif
+
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
@@ -158,12 +183,16 @@ static void Usage(const char *argv0)
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  bool  showVersion = false;
+  bool  showVersion = false, showVerbose = false;
   int  optChar;
-  while ((optChar = getopt(argc, argv, "v")) != -1) {
+  while ((optChar = getopt(argc, argv, "vV")) != -1) {
     switch (optChar) {
       case 'v':
         showVersion = true;
+        break;
+      case 'V':
+        showVersion = true;
+        showVerbose = true;
         break;
       default:
         Usage(argv[0]);
@@ -174,44 +203,30 @@ int main(int argc, char *argv[])
 
   if (showVersion) {
 #if defined(DWM_PKG_CAN_USE_REFLECTION)
-    auto pkgs = Dwm::Pkg::get_packages<^^Dwm>();
-    for (const auto & pkg : pkgs) {
-      std::cout << pkg.second << '\n'; // << pkg.second.as_json() << '\n';
+    if (showVerbose) {
+      DumpPackagesJson();
+    }
+    else {
+      auto pkgs = Dwm::Pkg::get_packages<^^Dwm>();
+      for (auto & pkg : pkgs) {
+        std::cout << pkg.second.first << '\n';
+      }
     }
 #else
-    std::cout << Dwm::Pkg::info << '\n'; // << Dwm::Pkg::info.as_json() << '\n';
+    if (showVerbose) {
+      std::cout << "[\n"
+                << "  " << Dwm::dwmwhat::info.as_json() << ",\n"
+                << "  " << Dwm::Pkg::info.as_json() << '\n'
+                << "]\n";
+    }
+    else {
+      std::cout << Dwm::dwmwhat::info.view() << '\n';
+      std::cout << Dwm::Pkg::info.view() << '\n';
+    }
 #endif
     return 0;
   }
 
-#if 0
-  Dwm::Pkg::StringLiteral l("left_literal");
-  Dwm::Pkg::StringLiteral r("right_literal");
-  std::cout << std::string_view(l+r);
-#endif
-
-#if 0
-  auto  vars = Dwm::Pkg::get_vars_in_ns<"Pkg",^^::, Dwm::Pkg::Info,
-                                        std::string, const char *>();
-  for (const auto & var : vars) {
-    std::cout << var.first;
-    std::visit([] (auto && arg)
-    {
-      using T = std::decay_t<decltype(arg)>;
-      if constexpr (std::is_same_v<T,Dwm::Pkg::Info>
-                    || std::is_same_v<T,std::string>) {
-        std::cout << ' ' << arg;
-      }
-      else if constexpr (std::is_same_v<T,const char *>) {
-        if (arg != nullptr) {
-          std::cout << ' ' << arg;
-        }
-      }
-    }, var.second);
-    std::cout << '\n';
-  }
-#endif
-  
   int  rc = 0;
   for (int arg = optind; arg < argc; ++arg) {
     pair<char *,size_t>  mf = MapFile(argv[arg]);

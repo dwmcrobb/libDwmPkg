@@ -55,7 +55,7 @@
 #define DWM_PKG_GHOST         "\xF0\x9F\x91\xBB"
 #define DWM_PKG_FILE_FOLDER   "\xF0\x9F\x93\x81"
 #define DWM_PKG_OPEN_FOLDER   "\xF0\x9F\x93\x82"
-#define DWM_PKG_JACKOLANTERN  "\xF0\x9F\x8E\x83 "    // jack-o-lantern
+#define DWM_PKG_JACKOLANTERN  "\xF0\x9F\x8E\x83"    // jack-o-lantern
 
 // #define DWM_PKG_DELIM " \xF0\x9F\x91\xBD "    // alien
 // #define DWM_PKG_DELIM " \xF0\x9F\xA4\x96 "    // robot emoji
@@ -78,7 +78,7 @@ namespace Dwm {
     class Info
     {
     public:
-      constexpr Info(const char (&name)[N], const char (&version)[V],
+      consteval Info(const char (&name)[N], const char (&version)[V],
                      const char (&cpyright)[C], const char (&date)[D],
                      const char (&time)[T], const char (&file)[F])
           : _sl(DWM_PKG_DELIM,"@(#)",name,version,cpyright,date,time,file)
@@ -117,8 +117,11 @@ namespace Dwm {
       { return _sl; }
 
       consteval std::string_view view() const noexcept
-      { return std::string_view(_sl.view().data() + (sizeof("@(#)")-1),
-                                _sl.view().size() - (sizeof("@(#)")-1)); }
+      {
+        return std::string_view(name().data(),
+                                _sl.view().size()
+                                - (name().data() - _sl.view().data()));
+      }
         
       constexpr size_t size_of_seg_lens() const noexcept
       { return _sl.size_of_seg_lengths(); }
@@ -127,15 +130,17 @@ namespace Dwm {
       { return _sl.num_segments(); }
       
     private:
-      SegmentedLiteral<sizeof(DWM_PKG_DELIM),7,sizeof("@(#)")+N+V+C+D+T+F+6*sizeof(DWM_PKG_DELIM)>  _sl;
+      consteval static auto calc_num_chars() {
+        //  The total chars we need is the sum of the chars for
+        //  name (N), version (V), copyright (C), data (D), time (T)
+        // and file (F), plus 6 delimiters and the '@(#}' prefix..
+        return (sizeof("@(#)") + N + V + C + D + T + F
+                + (6 * sizeof(DWM_PKG_DELIM)));
+      };
+      
+      SegmentedLiteral<sizeof(DWM_PKG_DELIM)-1,7,calc_num_chars()>  _sl;
     };
-    
-    inline constexpr Info
-    info("DwmPkg","0.0.42",
-         "Copyright " DWM_PKG_COPYRIGHT "  Daniel McRobb 2025 "
-         DWM_PKG_JACKOLANTERN DWM_PKG_GHOST,
-         __DATE__, __TIME__, DWM_PKG_OPEN_FOLDER __FILE_NAME__);
-    
+
   }  // namespace Pkg
 
 }  // namespace Dwm
