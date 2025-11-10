@@ -1,3 +1,4 @@
+# REFLECTION = true
 ifdef REFLECTION
 CXX = /usr/local/bloomberg/bin/clang++
 CXXFLAGS = -g -O2 -std=c++26 -stdlib=libc++ -freflection-latest -I/usr/local/bloomberg/include/c++/v1 -I../../classes/include
