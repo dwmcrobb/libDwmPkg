@@ -66,14 +66,14 @@ namespace Crap {
 }
 #endif
 
-#define DWMWHAT_COPYRIGHT "Copyright " DWM_PKG_COPYRIGHT \
-  "  Daniel McRobb 2025 " DWM_PKG_JACKOLANTERN DWM_PKG_GHOST
+#define DWMWHAT_COPYRIGHT  "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN \
+  DWM_PKG_SYM_GHOST " "
 
 namespace Dwm {
   namespace dwmwhat {
     inline constexpr const Dwm::Pkg::Info __attribute__((used))
-    info("dwmwhat","1.0.0",DWMWHAT_COPYRIGHT,__DATE__,__TIME__,
-         DWM_PKG_OPEN_FOLDER " " __FILE_NAME__ ":" DWM_PKG_MK_LINE_ARG(__LINE__));
+    info(DWM_PKG_TYPE_EXE,"dwmwhat",Pkg::k_statusRel,"1.0.0",
+         DWMWHAT_COPYRIGHT,"\xE2\x96\xB6 mcplex.net");
   }
 }
 
@@ -147,9 +147,22 @@ static vector<string> FindSccsStrings(const char * map, size_t size)
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
-static void DumpPackagesJson()
+static auto GetPackages()
 {
   auto pkgs = Dwm::Pkg::get_packages<^^Dwm>();
+  std::ranges::sort(pkgs);
+  auto u = std::ranges::unique(pkgs);
+  pkgs.erase(u.begin(),u.end());
+  return pkgs;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void DumpPackagesJson()
+{
+  auto pkgs = GetPackages();
+  
   if (! pkgs.empty()) {
     cout << "[\n";
     bool  first = true;
@@ -163,6 +176,21 @@ static void DumpPackagesJson()
       }
     }
     cout << "\n]\n";
+  }
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void DumpPackagesPlain()
+{
+  auto pkgs = GetPackages();
+  
+  if (! pkgs.empty()) {
+    for (auto & pkg : pkgs) {
+      cout << pkg.second.first << '\n';
+    }
   }
   return;
 }
@@ -207,10 +235,7 @@ int main(int argc, char *argv[])
       DumpPackagesJson();
     }
     else {
-      auto pkgs = Dwm::Pkg::get_packages<^^Dwm>();
-      for (auto & pkg : pkgs) {
-        std::cout << pkg.second.first << '\n';
-      }
+      DumpPackagesPlain();
     }
 #else
     if (showVerbose) {

@@ -1,0 +1,43 @@
+TOP   	      	 := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
+BUILD_DOCS       := @BUILD_DOCS@
+CLASSINC         := -I${TOP}/classes/include
+CXX		 := @CXX@
+# For experimental C++26 reflection testing
+# CXX		 := /usr/local/bloomberg/bin/clang++
+CXXFLAGS	 := @CXXFLAGS@
+# For experimental C++26 reflection testing
+# CXXFLAGS	 := -g -O2 -std=c++26 -stdlib=libc++ -freflection-latest -I/usr/local/bloomberg/include/c++/v1
+CXX_SHARED_FLAGS := @CXX_SHARED_FLAGS@
+EXTINCS          := @EXTINCS@
+EXTLIBS          := @PKG_EXTLIBS@ @EXTLIBS@
+HTMLMAN          := @htmlman@
+LDFLAGS		 := @LDFLAGS@
+# For experimental C++26 reflection testing
+# LDFLAGS		 :=  -std=c++26 -stdlib=libc++
+LD_SHARED_FLAGS  := @LD_SHARED_FLAGS@
+LIBTOOL          := @LIBTOOL@
+# For experimental C++26 reflection testing
+# LIBTOOL          := /home/dwm/tmp/libtool
+LIBTOOLCOMPILE   := ${LIBTOOL} --mode=compile --tag=CXX ${CXX}
+LIBTOOLLINK      := ${LIBTOOL} --mode=link --tag=CXX ${CXX}
+MANDOC           := @MANDOC@
+MY_EXTINCS       := @MY_EXTINCS@
+OSNAME		 := @OSNAME@
+PTHREADCXXFLAGS	 := @PTHREADCXXFLAGS@
+PTHREADLDFLAGS	 := @PTHREADLDFLAGS@
+SHARED_LIB_EXT   := @SHARED_LIB_EXT@
+SHLIB_VERSION    := $(shell ${TOP}/getvers.sh -s)
+TARDIR		 := @TARDIR@@prefix@
+VERSION		 := @DWM_VERSION@
+INSTALL          := @LIBTOOL@ --mode=install $(TOP)/install-sh
+INSTALLPREFIX	 := @prefix@
+DOCINSTALLDIR	 := ${INSTALLPREFIX}/share/doc/libDwmPkg
+TARGETVENDOR     := @target_vendor@
+
+# TARGETS          ?=
+# CLEANTARGETS     ?=
+# DEPSTARGETS      ?=
+# DISTCLEANTARGETS ?=
+# TARTARGETS       ?=
+
+.DEFAULT_GOAL    := all

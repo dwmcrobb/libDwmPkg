@@ -1,0 +1,7 @@
+autom4te.cache/**
+staging/**
+*~
+Makefile.vars
+config.log
+config.status
+libDwmPkg_*.deb

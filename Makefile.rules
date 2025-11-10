@@ -1,0 +1,21 @@
+.PHONY: all tarprep distclean clean clean-tarprep cleandeps ltclean
+
+all:: $(sort $(TARGETS))
+
+tarprep: $(sort ${TARTARGETS})
+
+distclean:: clean
+	@${LIBTOOL} --quiet --mode=clean rm -f ${DISTCLEANTARGETS}
+
+clean:: clean-tarprep ltclean
+	@rm -f $(sort ${CLEANTARGETS})
+
+ltclean::
+	@${LIBTOOL} --quiet --mode=clean rm -f $(sort ${LTCLEANTARGETS})
+
+clean-tarprep::
+	@${LIBTOOL} --quiet --mode=uninstall rm -f $(sort ${TARTARGETS})
+
+cleandeps::
+	@${LIBTOOL} --quiet --mode=clean rm -f ${DEPSTARGETS}
+

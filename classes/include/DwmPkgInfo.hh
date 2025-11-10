@@ -51,94 +51,211 @@
 
 #include "DwmPkgSegmentedLiteral.hh"
 
-#define DWM_PKG_COPYRIGHT     "\xC2\xA9\xEF\xB8\x8F"
-#define DWM_PKG_GHOST         "\xF0\x9F\x91\xBB"
-#define DWM_PKG_FILE_FOLDER   "\xF0\x9F\x93\x81"
-#define DWM_PKG_OPEN_FOLDER   "\xF0\x9F\x93\x82"
-#define DWM_PKG_JACKOLANTERN  "\xF0\x9F\x8E\x83"    // jack-o-lantern
+//----------------------------------------------------------------------------
+//!  Just some macros for UTF-8 encodings of some unicode characters
+//----------------------------------------------------------------------------
+#define DWM_PKG_SYM_ALARM_CLOCK       "\xE2\x8F\xB0"            // alarm clock
+#define DWM_PKG_SYM_ALIEN             "\xF0\x9F\x91\xBD"        // alien
+#define DWM_PKG_SYM_BLUE_CIRCLE       "\xF0\x9F\x94\xB5"
+#define DWM_PKG_SYM_BOOKS             "\xF0\x9F\x93\x9A"
+#define DWM_PKG_SYM_CALENDAR          "\xF0\x9F\x93\x86"  // tear-off Calendar
+#define DWM_PKG_SYM_CAUTION_SIGN      "\xE2\x98\xA1"
+#define DWM_PKG_SYM_CHANGE_TETRA      "\xF0\x9D\x8C\xA1"  // change tetragram
+#define DWM_PKG_SYM_CHECK_MARK        "\xE2\x9C\x93"
+#define DWM_PKG_SYM_CONSTRUCT_WORKER  "\xF0\x9F\x91\xB7"
+#define DWM_PKG_SYM_CONSTRUCT_ZONE    "\xF0\x9F\x9A\xA7"
+#define DWM_PKG_SYM_COPYRIGHT         "\xC2\xA9\xEF\xB8\x8F "
+#define DWM_PKG_SYM_CYCLONE           "\xF0\x9F\x8C\x80"        // cyclone
+#define DWM_PKG_SYM_DOT               "\xE2\x97\x8F"            // dot
+#define DWM_PKG_SYM_FILE_FOLDER       "\xF0\x9F\x93\x81"
+#define DWM_PKG_SYM_FULLHASH          "\xEF\xBC\x83"
+#define DWM_PKG_SYM_GEAR              "\xE2\x9A\x99"            // gear
+#define DWM_PKG_SYM_GHOST             "\xF0\x9F\x91\xBB"
+#define DWM_PKG_SYM_HEAVY_CHECK       "\xE2\x9C\x94"
+#define DWM_PKG_SYM_HEAVY_EXCL        "\xE2\x9D\x97"
+#define DWM_PKG_SYM_JACKOLANTERN      "\xF0\x9F\x8E\x83"  // jack-o-lantern
+#define DWM_PKG_SYM_OPEN_BOOK         "\xF0\x9F\x93\x96"
+#define DWM_PKG_SYM_OPEN_FOLDER       "\xF0\x9F\x93\x82"
+#define DWM_PKG_SYM_PACKAGE           "\xF0\x9F\x93\xA6"  // Package
+#define DWM_PKG_SYM_PAGE              "\xF0\x9F\x93\x84"
+#define DWM_PKG_SYM_ROBOT             "\xF0\x9F\xA4\x96"        // robot emoji
+#define DWM_PKG_SYM_ROCKET            "\xF0\x9F\x9A\x80"        // rocket
+#define DWM_PKG_SYM_WARNING_SIGN      "\xE2\x9A\xA0"
+#define DWM_PKG_SYM_WHITE_CHECK       "\xE2\x9C\x85"
 
-// #define DWM_PKG_DELIM " \xF0\x9F\x91\xBD "    // alien
-// #define DWM_PKG_DELIM " \xF0\x9F\xA4\x96 "    // robot emoji
-// #define DWM_PKG_DELIM " \xE2\x9A\x99 "        // gear
-// #define DWM_PKG_DELIM " \xF0\x9F\x8C\x80 "    // cyclone
-// #define DWM_PKG_DELIM " \xF0\x9F\x91\xB7 "    // construction worker
-// #define DWM_PKG_DELIM " \xF0\x9F\x9A\x80 "    // rocket
-// #define DWM_PKG_DELIM " \xE2\x9E\xA1\xEF\xB8\x8F  "  // right arrow
-#define DWM_PKG_DELIM " "
+//----------------------------------------------------------------------------
+//!  The three characters I use for 'status'.  Development, release candidate
+//!  or release.
+//----------------------------------------------------------------------------
+#define DWM_PKG_STATUS_DEV  " " DWM_PKG_SYM_HEAVY_EXCL " "
+#define DWM_PKG_STATUS_RC   " " DWM_PKG_SYM_CONSTRUCT_WORKER " "
+#define	DWM_PKG_STATUS_REL  " " DWM_PKG_SYM_HEAVY_CHECK " "
+
+//----------------------------------------------------------------------------
+//!  The characters I use for 'package type', one of 'header-only library',
+//!  'library', 'executable' or 'documentation'.
+//----------------------------------------------------------------------------
+#define DWM_PKG_TYPE_HDR  DWM_PKG_SYM_FULLHASH " "
+#define DWM_PKG_TYPE_LIB  DWM_PKG_SYM_BOOKS " "
+#define DWM_PKG_TYPE_EXE  DWM_PKG_SYM_ROBOT " "
+#define DWM_PKG_TYPE_DOC  DWM_PKG_SYM_PAGE " "
+
+#define DWM_PKG_SYM_OTHER " "
+
+#define DWM_PKG_DELIM ""
 
 namespace Dwm {
 
   namespace Pkg {
 
+    inline constexpr char k_statusDev[sizeof(DWM_PKG_STATUS_DEV)] =
+      DWM_PKG_STATUS_DEV;
+    inline constexpr char k_statusRC[sizeof(DWM_PKG_STATUS_RC)] =
+      DWM_PKG_STATUS_RC;
+    inline constexpr char k_statusRel[sizeof(DWM_PKG_STATUS_REL)] =
+      DWM_PKG_STATUS_REL;
+    
     //------------------------------------------------------------------------
-    //!  
+    //!  Class template to hold package information using an encapsulated
+    //!  SegmentedLiteral to build a compile-time string so we have a
+    //!  contiguous character array that can be found in a binary (object
+    //!  file, library or executable).  An instance of this template
+    //!  would normally be declared inline constexpr in a header file
+    //!  that is visible to all translation units.  The linker takes care
+    //!  of eliminating duplicates.  You probably also want to mark your
+    //!  instance with __attribute__((used)) so the linker doesn't remove
+    //!  it due to no apparent use.
     //------------------------------------------------------------------------
-    template <std::size_t N, std::size_t V, std::size_t C, std::size_t D,
-              std::size_t T, std::size_t F>
+    template <std::size_t P, std::size_t N, std::size_t S, std::size_t V,
+              std::size_t C, std::size_t O>
     class Info
     {
     public:
-      consteval Info(const char (&name)[N], const char (&version)[V],
-                     const char (&cpyright)[C], const char (&date)[D],
-                     const char (&time)[T], const char (&file)[F])
-          : _sl(DWM_PKG_DELIM,"@(#)",name,version,cpyright,date,time,file)
+      //----------------------------------------------------------------------
+      //!  Construct from a given package type @c pkgtype (see the
+      //!  @c DWM_PKG_TYPE_* macros above), package @c name, package
+      //!  @c status (see the @c DWM_PKG_STATUS_* macros above), package
+      //!  @c version, package @c copyright and finally any @c other
+      //!  information.  All arguments are string literals.
+      //----------------------------------------------------------------------
+      consteval Info(const char (&pkgtype)[P], const char (&name)[N],
+                     const char (&status)[S], const char (&version)[V],
+                     const char (&cpyright)[C], const char (&other)[O])
+          : _sl("","@(#)",pkgtype,name,status,version,DWM_PKG_SYM_COPYRIGHT,
+                cpyright,DWM_PKG_SYM_CALENDAR " ",__DATE__,
+                DWM_PKG_SYM_OTHER,other)
       {}
-      
-      constexpr std::string_view name() const noexcept
-      { return _sl.nth(1); }
-      
-      constexpr std::string_view version() const noexcept
-      { return _sl.nth(2); }
-      
-      constexpr std::string_view copyright() const noexcept
-      { return _sl.nth(3); }
-      
-      constexpr std::string_view date() const noexcept
-      { return _sl.nth(4); }
-      
-      constexpr std::string_view time() const noexcept
-      { return _sl.nth(5); }
-      
-      constexpr std::string_view file() const noexcept
-      { return _sl.nth(6); }
-      
-      constexpr std::string as_json() const noexcept
+
+      constexpr bool operator == (const Info & info) const
       {
-        return "{\"name\": \"" + std::string(name())
-          + "\", \"version\": \"" + std::string(version())
-          + "\", \"copyright\": \"" + std::string(copyright())
-          + "\", \"date\": \"" + std::string(date())
-          + "\", \"time\": \"" + std::string(time())
-          + "\", \"id\": \"" + std::string(_sl)
-          + "\", \"file\": \"" + std::string(file()) + "\"}";
+        return (view() == info.view());
       }
 
+      constexpr bool operator < (const Info & info) const
+      {
+        return (view() < info.view());
+      }
+
+      //----------------------------------------------------------------------
+      //!  Returns the package type.
+      //----------------------------------------------------------------------
+      constexpr std::string_view type() const noexcept
+      { return _sl.nth(1); }
+
+      //----------------------------------------------------------------------
+      //!  Returns the package name.
+      //----------------------------------------------------------------------
+      constexpr std::string_view name() const noexcept
+      { return _sl.nth(2); }
+
+      //----------------------------------------------------------------------
+      //!  Returns the package status.
+      //----------------------------------------------------------------------
+      constexpr std::string_view status() const noexcept
+      { return _sl.nth(3); }
+
+      //----------------------------------------------------------------------
+      //!  Returns the package version.
+      //----------------------------------------------------------------------
+      constexpr std::string_view version() const noexcept
+      { return _sl.nth(4); }
+      
+      //----------------------------------------------------------------------
+      //!  Returns the package copyright.
+      //----------------------------------------------------------------------
+      constexpr std::string_view copyright() const noexcept
+      { return _sl.nth(6); }
+      
+      //----------------------------------------------------------------------
+      //!  Returns a combination of date and time the object was compiled.
+      //----------------------------------------------------------------------
+      constexpr std::string_view datetime() const noexcept
+      { return _sl.nth(8); }
+
+      //----------------------------------------------------------------------
+      //!  Returns the 'other' data.
+      //----------------------------------------------------------------------
+      constexpr std::string_view other() const noexcept
+      { return _sl.nth(10); }
+      
+      //----------------------------------------------------------------------
+      //!  Returns a string holding the package information in JSON format.
+      //----------------------------------------------------------------------
+      constexpr std::string as_json() const noexcept
+      {
+        return "{\"type\": \"" + std::string(type())
+          + "\", \"name\": \"" + std::string(name())
+          + "\", \"status\": \"" + std::string(status())
+          + "\", \"version\": \"" + std::string(version())
+          + "\", \"copyright\": \"" + std::string(copyright())
+          + "\", \"datetime\": \"" + std::string(datetime())
+          + "\", \"other\": \"" + std::string(other())
+          + "\", \"id\": \"" + std::string(_sl)
+          + "\"}";
+      }
+
+      //----------------------------------------------------------------------
+      //!  Returns a string_view of the whole underlying buffer.
+      //----------------------------------------------------------------------
       consteval operator std::string_view () const noexcept
       { return _sl; }
 
+      //----------------------------------------------------------------------
+      //!  Returns a view of the buffer from the start of the 'type' segment
+      //!  to the end (skipping over the prefix).
+      //----------------------------------------------------------------------
       consteval std::string_view view() const noexcept
       {
-        return std::string_view(name().data(),
+        return std::string_view(type().data(),
                                 _sl.view().size()
-                                - (name().data() - _sl.view().data()));
+                                - (type().data() - _sl.view().data()));
       }
         
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
       constexpr size_t size_of_seg_lens() const noexcept
       { return _sl.size_of_seg_lengths(); }
 
-  constexpr size_t num_segments() const noexcept
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      constexpr size_t num_segments() const noexcept
       { return _sl.num_segments(); }
       
     private:
       consteval static auto calc_num_chars() {
         //  The total chars we need is the sum of the chars for
-        //  name (N), version (V), copyright (C), data (D), time (T)
-        // and file (F), plus 6 delimiters and the '@(#}' prefix..
-        return (sizeof("@(#)") + N + V + C + D + T + F
-                + (6 * sizeof(DWM_PKG_DELIM)));
+        //  the prefix, PkgType (P}, name (N), status (S), version (V),
+        //  copyright symbol, copyright (C), calendar symbol,
+        //  combined date+time, other symbol and other (O).
+        return (sizeof("@(#)") + P + N + S + V + sizeof(DWM_PKG_SYM_COPYRIGHT)
+                + C + sizeof(DWM_PKG_SYM_CALENDAR) + 1
+                + (sizeof(__DATE__) + sizeof(__TIME__))
+                + sizeof(DWM_PKG_SYM_OTHER) + O);
       };
       
-      SegmentedLiteral<sizeof(DWM_PKG_DELIM)-1,7,calc_num_chars()>  _sl;
+      SegmentedLiteral<0,11,calc_num_chars()>  _sl;
     };
 
   }  // namespace Pkg

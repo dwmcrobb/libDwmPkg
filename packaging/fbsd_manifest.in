@@ -1,0 +1,15 @@
+name: "libDwmPkg"
+version: "@TAGVERSION@"
+origin: "devel/libDwmPkg"
+prefix: "@prefix@"
+www: "http://www.rfdm.com"
+maintainer: "dwmcrobb@me.com"
+comment: "Tiny C++ header-only library for embedding package information"
+desc: "Tiny C++ header-only library for embedding package information in binaries as a string literal"
+licenselogic: "single"
+licenses: ["BSD"]
+categories: ["devel"]
+files: {
+}
+scripts: {
+}

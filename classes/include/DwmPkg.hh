@@ -70,11 +70,11 @@ namespace Dwm {
 #define DWM_PKG_MK_LINE_ARG2(x) #x
 
     inline constexpr const Info __attribute__((used))
-    info("DwmPkg","0.0.42",
-         "Copyright " DWM_PKG_COPYRIGHT "  Daniel McRobb 2025 "
-         DWM_PKG_JACKOLANTERN DWM_PKG_GHOST,
-         __DATE__, __TIME__,
-         DWM_PKG_OPEN_FOLDER " " __FILE_NAME__ ":" DWM_PKG_MK_LINE_ARG(__LINE__));
+    info(DWM_PKG_TYPE_HDR, "DwmPkg", k_statusRC, "0.0.42",
+         "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST " ",
+         "\xE2\x96\xB6 mcplex.net");
+    // ,
+    // DWM_PKG_OPEN_FOLDER __FILE_NAME__ ":" DWM_PKG_MK_LINE_ARG(__LINE__));
 
 #if defined(DWM_PKG_CAN_USE_REFLECTION)
     

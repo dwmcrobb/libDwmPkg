@@ -40,6 +40,7 @@
 //---------------------------------------------------------------------------
 
 #include <cassert>
+#include <cstring>
 #include <iostream>
 
 #include "DwmPkgSegmentedLiteral.hh"

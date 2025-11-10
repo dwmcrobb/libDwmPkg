@@ -1,0 +1,44 @@
+.Dd April 10, 2017
+.Dt dwmwhat 1
+.Os mcplex.net
+.Sh NAME
+.Nm dwmwhat
+.Nd Find and display version control strings in object files
+.Sh SYNOPSIS
+.Nm
+.Op Fl v
+.Op Fl V
+.Cm file(s)
+.Sh DESCRIPTION
+.Nm
+searches one or more files for strings starting with \fI@(#)\fR and displays
+the strings on stdout, one per line.  It is similar to the old
+.Xr what 1 utility from SCCS, but provides special functionality for files
+built from source from a Subversion repository.
+.Pp
+Optional arguments:
+.Pp
+.Bl -tag -width indent
+.It Fl v
+Print the version of
+.Xr dwmwhat 1 itself.
+.It Fl v
+Print the version of
+.Xr dwmwhat 1 itself, in JSON form.
+.El
+.Sh EXAMPLES
+View the version information for the installed version of
+.Xr dwmwhat 1 .
+.Bd -literal
+% dwmwhat `which dwmwhat`
+＃ DwmPkg 👷 0.0.42©️ Daniel McRobb 2025 🎃👻 📆 Nov 10 2025 ▶ mcplex.net
+🤖 dwmwhat ✔ 0.0.42©️ Daniel McRobb 2025 🎃👻 📆 Nov 10 2025 ▶ mcplex.net
+.Ed
+
+.Sh SEE ALSO
+.Lk .. "Manpage Index"
+.Sh AUTHORS
+Copyright (c) 2016,2025 Daniel W. McRobb
+.Mt dwm@mcplex.net
+.Pp
+
