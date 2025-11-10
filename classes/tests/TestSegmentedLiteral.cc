@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file TestSegmentedLiteral.cc
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Unit tests for Dwm::Pkg::SegmentedLiteral
 //---------------------------------------------------------------------------
 
 #include <cassert>
@@ -45,10 +45,16 @@
 
 #include "DwmPkgSegmentedLiteral.hh"
 
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 inline constexpr const Dwm::Pkg::SegmentedLiteral
 TestSegmentedLiteral(" ","@(#)","TestSegmentedLiteral","",
                      "Copyright Daniel McRobb 2025",__DATE__,__TIME__);
 
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   constexpr Dwm::Pkg::SegmentedLiteral  allEmpty("","","","");
