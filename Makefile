@@ -19,7 +19,7 @@ freebsd-pkg: tarprep
 	pkg create -o . -r staging -m staging
 
 darwin-pkg: tarprep
-	pkgbuild --root staging --identifier net.mcplex.libDwmUnitAssert --version ${VERSION} libDwmUnitAssert-${VERSION}.pkg
+	pkgbuild --root staging --identifier net.mcplex.libDwmPkg --version ${VERSION} libDwmPkg-${VERSION}.pkg
 
 linux-pkg: tarprep
 	if [ ! -d staging/DEBIAN ]; then mkdir staging/DEBIAN; fi
@@ -34,4 +34,4 @@ otherDistclean::
 	${MAKE} -C packaging distclean
 	rm -Rf autom4te.cache staging
 	rm -f config.log config.status Makefile.vars
-	rm -f libDwmUnitAssert_*.deb
+	rm -f libDwmPkg_*.deb libDwmPkg-*.pkg
