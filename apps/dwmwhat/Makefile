@@ -4,11 +4,10 @@ $(dwm_myns dwmwhat)
 $(dwm_aliasfn my,dwm_my)
 $(my mydir := $(abspath $(dir $(myfile))))
 
-# $(dwm_include_once $(abspath $(my mydir)/../../classes/src/Makefile))
+$(dwm_include_once $(abspath $(my mydir)/../../Makefile.vars))
 
 $(my CxxFlags    := ${CXXFLAGS} ${PTHREADCXXFLAGS})
 $(my Incs        := -I$(abspath $(my mydir)/../../classes/include))
-# $(my Lib         := $(abspath $(my mydir)/../../classes/lib/libDwmUnitAssert.la))
 $(my Link        := ${LIBTOOL} --quiet --mode=link --tag=CXX ${CXX})
 $(my ObjNames    := dwmwhat.o)
 $(my Objs        := $(patsubst %.o,$(my mydir)/%.o,$(my ObjNames)))
