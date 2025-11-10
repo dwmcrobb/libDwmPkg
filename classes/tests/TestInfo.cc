@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
   assert(g_info1.copyright() == "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST " ");
   assert(g_info1.other() == "\xE2\x96\xB6 mcplex.net");
 
-  const Dwm::Pkg::Info __attribute__((used))
+  constexpr const Dwm::Pkg::Info
     maininfo1(DWM_PKG_TYPE_EXE, "maininfo1", DWM_PKG_STATUS_REL, "1.0.0",
               "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST " ",
               "\xE2\x96\xB6 mcplex.net");
@@ -66,8 +66,13 @@ int main(int argc, char *argv[])
   assert(maininfo1.name() == "maininfo1");
   assert(maininfo1.status() == DWM_PKG_STATUS_REL);
   assert(maininfo1.version() == "1.0.0");
-  assert(maininfo1.copyright() == "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST " ");
+  assert(maininfo1.copyright()
+         == "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST
+         " ");
   assert(maininfo1.other() == "\xE2\x96\xB6 mcplex.net");
 
+  assert(maininfo1 != g_info1);
+  assert(g_info1 < maininfo1);
+  
   return 0;
 }
