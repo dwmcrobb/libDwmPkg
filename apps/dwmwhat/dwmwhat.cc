@@ -69,14 +69,6 @@ namespace Crap {
 #define DWMWHAT_COPYRIGHT  "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN \
   DWM_PKG_SYM_GHOST " "
 
-namespace Dwm {
-  namespace dwmwhat {
-    inline constexpr const Dwm::Pkg::Info __attribute__((used))
-    info(DWM_PKG_TYPE_EXE,"dwmwhat",DWM_PKG_STATUS_REL,"1.0.0",
-         DWMWHAT_COPYRIGHT,"\xE2\x96\xB6 mcplex.net");
-  }
-}
-
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
@@ -240,12 +232,10 @@ int main(int argc, char *argv[])
 #else
     if (showVerbose) {
       std::cout << "[\n"
-                << "  " << Dwm::dwmwhat::info.as_json() << ",\n"
                 << "  " << Dwm::Pkg::info.as_json() << '\n'
                 << "]\n";
     }
     else {
-      std::cout << Dwm::dwmwhat::info.view() << '\n';
       std::cout << Dwm::Pkg::info.view() << '\n';
     }
 #endif
