@@ -104,6 +104,13 @@
 
 #define DWM_PKG_DELIM ""
 
+//----------------------------------------------------------------------------
+//!  DWM_PKG_MK_LINE_ARG(__LINE__) can be used to get a string literal of
+//!  __LINE__.
+//----------------------------------------------------------------------------
+#define DWM_PKG_MK_LINE_ARG(x) DWM_PKG_MK_LINE_ARG2(x)
+#define DWM_PKG_MK_LINE_ARG2(x) #x
+
 namespace Dwm {
 
   namespace Pkg {
@@ -258,6 +265,11 @@ namespace Dwm {
       SegmentedLiteral<0,11,calc_num_chars()>  _sl;
     };
 
+    inline constexpr const Info __attribute__((used))
+    info(DWM_PKG_TYPE_HDR, "DwmPkg", k_statusRC, "0.0.42",
+         "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST " ",
+         "\xE2\x96\xB6 mcplex.net");
+    
   }  // namespace Pkg
 
 }  // namespace Dwm
