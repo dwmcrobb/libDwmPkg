@@ -47,12 +47,6 @@ DWM_REQUIRES_DWMPKG(dwmgmk,0.0.0)
 dnl  Check for C++20
 DWM_CHECK_CPLUSPLUS_20
 
-DWM_CHECK_STD_FORMAT
-if [[ ${DWM_HAVE_STD_FORMAT} -eq 0 ]]; then
-  DWM_CHECK_PKG(fmt)
-  DWM_CHECK_LIBFMT
-fi
-
 AC_SUBST(PC_REQ_PKGS)
 
 PKG_EXTINCS=`pkg-config --cflags-only-I ${PC_PKGS}`
@@ -94,5 +88,6 @@ AC_ARG_ENABLE([docs],[AS_HELP_STRING([--enable-docs],[build documentation])],
 AC_SUBST(BUILD_DOCS)
 
 AC_CONFIG_FILES([Makefile.vars packaging/libDwmPkg.pc
-                 packaging/fbsd_manifest packaging/debcontrol doc/Doxyfile])
+                 packaging/fbsd_manifest packaging/debcontrol doc/Doxyfile
+		 classes/include/DwmPkgInfo.hh])
 AC_OUTPUT
