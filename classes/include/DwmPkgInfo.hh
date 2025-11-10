@@ -115,13 +115,6 @@ namespace Dwm {
 
   namespace Pkg {
 
-    inline constexpr char k_statusDev[sizeof(DWM_PKG_STATUS_DEV)] =
-      DWM_PKG_STATUS_DEV;
-    inline constexpr char k_statusRC[sizeof(DWM_PKG_STATUS_RC)] =
-      DWM_PKG_STATUS_RC;
-    inline constexpr char k_statusRel[sizeof(DWM_PKG_STATUS_REL)] =
-      DWM_PKG_STATUS_REL;
-    
     //------------------------------------------------------------------------
     //!  Class template to hold package information using an encapsulated
     //!  SegmentedLiteral to build a compile-time string so we have a
@@ -278,7 +271,7 @@ namespace Dwm {
     };
 
     inline constexpr const Info __attribute__((used))
-    info(DWM_PKG_TYPE_HDR, "DwmPkg", k_statusRC, "0.0.42",
+    info(DWM_PKG_TYPE_HDR, "DwmPkg", DWM_PKG_STATUS_RC, "0.0.42",
          "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST " ",
          "\xE2\x96\xB6 mcplex.net");
     
