@@ -72,7 +72,7 @@ namespace Crap {
 namespace Dwm {
   namespace dwmwhat {
     inline constexpr const Dwm::Pkg::Info __attribute__((used))
-    info(DWM_PKG_TYPE_EXE,"dwmwhat",Pkg::k_statusRel,"1.0.0",
+    info(DWM_PKG_TYPE_EXE,"dwmwhat",DWM_PKG_STATUS_REL,"1.0.0",
          DWMWHAT_COPYRIGHT,"\xE2\x96\xB6 mcplex.net");
   }
 }
