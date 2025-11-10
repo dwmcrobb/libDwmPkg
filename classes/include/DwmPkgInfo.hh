@@ -153,16 +153,28 @@ namespace Dwm {
                 DWM_PKG_SYM_OTHER,other)
       {}
 
-      constexpr bool operator == (const Info & info) const
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      template <std::size_t PI, std::size_t NI, std::size_t SI,
+                std::size_t VI, std::size_t CI, std::size_t OI>
+      constexpr bool operator ==
+      (const Info<PI,NI,SI,VI,CI,OI> & info) const noexcept
       {
         return (view() == info.view());
       }
 
-      constexpr bool operator < (const Info & info) const
+      //----------------------------------------------------------------------
+      //!  
+      //----------------------------------------------------------------------
+      template <std::size_t PI, std::size_t NI, std::size_t SI,
+                std::size_t VI, std::size_t CI, std::size_t OI>
+      constexpr bool operator <
+      (const Info<PI,NI,SI,VI,CI,OI> & info) const noexcept
       {
         return (view() < info.view());
       }
-
+      
       //----------------------------------------------------------------------
       //!  Returns the package type.
       //----------------------------------------------------------------------
