@@ -34,47 +34,27 @@
 //===========================================================================
 
 //---------------------------------------------------------------------------
-//!  \file TestSegmentedLiteral.cc
+//!  \file TestInfo.cc
 //!  \author Daniel W. McRobb
 //!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
 #include <cassert>
-#include <cstring>
-#include <iostream>
 
-#include "DwmPkgSegmentedLiteral.hh"
+#include "DwmPkgInfo.hh"
 
-inline constexpr const Dwm::Pkg::SegmentedLiteral
-TestSegmentedLiteral(" ","@(#)","TestSegmentedLiteral","",
-                     "Copyright Daniel McRobb 2025",__DATE__,__TIME__);
+inline constexpr const Dwm::Pkg::Info __attribute__((used))
+g_info1(DWM_PKG_TYPE_HDR, "g_info1", DWM_PKG_STATUS_RC, "0.0.1",
+         "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST " ",
+         "\xE2\x96\xB6 mcplex.net");
 
 int main(int argc, char *argv[])
 {
-  constexpr Dwm::Pkg::SegmentedLiteral  allEmpty("","","","");
-  std::string_view  sv = allEmpty.view();
-  assert(sv.size() == 0);
-  
-  constexpr Dwm::Pkg::SegmentedLiteral  justEnoughArgs("","");
-  assert(justEnoughArgs.view().size() == 0);
-
-  constexpr Dwm::Pkg::SegmentedLiteral  delimsOnly(" ","","","");
-  assert(delimsOnly.view().size() == 2);
-  assert(delimsOnly.nth(0) == "");
-  assert(delimsOnly.nth(1) == "");
-  assert(delimsOnly.nth(2) == "");
-
-  constexpr Dwm::Pkg::SegmentedLiteral  emptyDelim("","abc","defg","hijkl");
-  assert(emptyDelim.view().size()
-         == strlen("abc") + strlen("defg") + strlen("hijkl"));
-  assert(emptyDelim.nth(0) == "abc");
-  assert(emptyDelim.nth(1) == "defg");
-  assert(emptyDelim.nth(2) == "hijkl");
-
-  assert(TestSegmentedLiteral.nth(0) == "@(#)");
-  assert(TestSegmentedLiteral.nth(1) == "TestSegmentedLiteral");
-
-  //  std::cout << TestSegmentedLiteral.view() << '\n';
-  
+  assert(g_info1.type() == DWM_PKG_TYPE_HDR);
+  assert(g_info1.name() == "g_info1");
+  assert(g_info1.status() == DWM_PKG_STATUS_RC);
+  assert(g_info1.version() == "0.0.1");
+  assert(g_info1.copyright() == "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN DWM_PKG_SYM_GHOST " ");
+  assert(g_info1.other() == "\xE2\x96\xB6 mcplex.net");
   return 0;
 }
