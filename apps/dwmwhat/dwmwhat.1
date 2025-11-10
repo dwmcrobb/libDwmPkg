@@ -13,8 +13,7 @@
 .Nm
 searches one or more files for strings starting with \fI@(#)\fR and displays
 the strings on stdout, one per line.  It is similar to the old
-.Xr what 1 utility from SCCS, but provides special functionality for files
-built from source from a Subversion repository.
+.Xr what 1 utility from SCCS.
 .Pp
 Optional arguments:
 .Pp
@@ -30,9 +29,15 @@ Print the version of
 View the version information for the installed version of
 .Xr dwmwhat 1 .
 .Bd -literal
-% dwmwhat `which dwmwhat`
-＃ DwmPkg 👷 0.0.42©️ Daniel McRobb 2025 🎃👻 📆 Nov 10 2025 ▶ mcplex.net
-🤖 dwmwhat ✔ 0.0.42©️ Daniel McRobb 2025 🎃👻 📆 Nov 10 2025 ▶ mcplex.net
+  % dwmwhat `which dwmwhat`
+  ＃ DwmPkg 👷 0.0.42©️ Daniel McRobb 2025 🎃👻 📆 Nov 10 2025 ▶ mcplex.net
+.Ed
+.Pp
+View the version information embedded in
+.Xr bash 1 .
+.Bd -literal
+  % dwmwhat `which bash`
+  Bash version 5.2.37(1) release GNU
 .Ed
 
 .Sh SEE ALSO
