@@ -39,6 +39,10 @@
 //!  \brief NOT YET DOCUMENTED
 //---------------------------------------------------------------------------
 
+#ifndef _DWMPKGSEGMENTEDLITERAL_HH_
+#define _DWMPKGSEGMENTEDLITERAL_HH_
+
+
 #include <algorithm>
 #include <cassert>
 #include <cstdint>
@@ -173,3 +177,5 @@ namespace Dwm {
   }  // namespace Pkg
 
 }  // namespace Dwm
+
+#endif  // _DWMPKGSEGMENTEDLITERAL_HH_
