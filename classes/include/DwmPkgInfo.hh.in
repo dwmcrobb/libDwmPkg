@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------
 //!  \file DwmPkgInfo.hh
 //!  \author Daniel W. McRobb
-//!  \brief NOT YET DOCUMENTED
+//!  \brief Dwm::Pkg::Info class template and associated support code
 //---------------------------------------------------------------------------
 
 #ifndef _DWMPKGINFO_HH_
@@ -101,8 +101,15 @@
 #define DWM_PKG_TYPE_EXE  DWM_PKG_SYM_ROBOT
 #define DWM_PKG_TYPE_DOC  DWM_PKG_SYM_PAGE
 
+//----------------------------------------------------------------------------
+//!  Symbol to place before the 'other' field.  I prefer nothing here and
+//!  will likely remove this.
+//----------------------------------------------------------------------------
 #define DWM_PKG_SYM_OTHER ""
 
+//----------------------------------------------------------------------------
+//!  Delimiter, which I'll likely remove and always use a fixed single space.
+//----------------------------------------------------------------------------
 #define DWM_PKG_DELIM ""
 
 //----------------------------------------------------------------------------
