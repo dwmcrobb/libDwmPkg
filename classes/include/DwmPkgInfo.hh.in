@@ -45,9 +45,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
-#include <filesystem>
-#include <iostream>
-#include <source_location>
 
 #include "DwmPkgSegmentedLiteral.hh"
 
