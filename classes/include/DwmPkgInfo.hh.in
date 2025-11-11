@@ -236,7 +236,7 @@ namespace Dwm {
       //!  Returns a view of the buffer from the start of the 'type' segment
       //!  to the end (skipping over the prefix).
       //----------------------------------------------------------------------
-      consteval std::string_view view() const noexcept
+      constexpr std::string_view view() const noexcept
       {
         return std::string_view(type().data(),
                                 _sl.view().size()
@@ -258,13 +258,21 @@ namespace Dwm {
     private:
       consteval static auto calc_num_chars() {
         //  The total chars we need is the sum of the chars for
-        //  the prefix, PkgType (P}, name (N), status (S), version (V),
+        //  the prefix, PkgType (P), name (N), status (S), version (V),
         //  copyright symbol, copyright (C), calendar symbol,
         //  combined date+time, other symbol and other (O).
+        return SegmentedLiteralChars<1,sizeof("@(#)"),P,N,S,V,
+                                     sizeof(DWM_PKG_SYM_COPYRIGHT),C,
+                                     sizeof(DWM_PKG_SYM_CALENDAR)+1,
+                                     sizeof(__DATE__),
+                                     sizeof(DWM_PKG_SYM_OTHER),O>::sz;
+#if 0
         return (sizeof("@(#)") + P + N + S + V + sizeof(DWM_PKG_SYM_COPYRIGHT)
                 + C + sizeof(DWM_PKG_SYM_CALENDAR) + 1
-                + (sizeof(__DATE__) + sizeof(__TIME__))
-                + sizeof(DWM_PKG_SYM_OTHER) + O);
+                //                + sizeof(__DATE__) + sizeof(__TIME__)
+                + sizeof(__DATE__)
+                + sizeof(DWM_PKG_SYM_OTHER) + O - 11);
+#endif
       };
       
       SegmentedLiteral<0,11,calc_num_chars()>  _sl;

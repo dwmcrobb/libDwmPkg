@@ -159,10 +159,20 @@ namespace Dwm {
     };
 
     //------------------------------------------------------------------------
+    //!  
+    //------------------------------------------------------------------------
+    template <std::size_t D, std::size_t ...Ns>
+    struct SegmentedLiteralChars
+    {
+      static const size_t sz =
+        ((D - 1) * (sizeof...(Ns) - 1)) + ((Ns-1) + ...);
+    };
+    
+    //------------------------------------------------------------------------
     //!  Deduction guide.  This is critical, since we need to deduce DelimLen,
     //!  NumSegs and NumChars to instantiate the template.  We deduce
     //!  DelimLen from the length of delim, minus 1 (remove null).  We
-    //!  deduce the number off segments from the number of variadic
+    //!  deduce the number of segments from the number of variadic
     //!  arguments (sizeof...(Ns)).  To deduce NumChars, we add up the
     //!  length of all of the variadic arguments (minus 1 for each to ignore
     //!  null termination).  We then add the number of characters we need to
@@ -172,7 +182,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     template <std::size_t D, std::size_t ...Ns>
     SegmentedLiteral(const char (&delim)[D], const char (&...s)[Ns])
-      -> SegmentedLiteral<D-1,sizeof...(Ns),((Ns-1) + ...) + ((D-1)*(sizeof...(Ns)-1))>;
+    -> SegmentedLiteral<D-1,sizeof...(Ns), SegmentedLiteralChars<D,Ns...>::sz>;
     
   }  // namespace Pkg
 
