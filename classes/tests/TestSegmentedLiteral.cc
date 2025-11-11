@@ -79,6 +79,8 @@ int main(int argc, char *argv[])
 
   assert(TestSegmentedLiteral.nth(0) == "@(#)");
   assert(TestSegmentedLiteral.nth(1) == "TestSegmentedLiteral");
+  std::cerr << "'" << TestSegmentedLiteral.nth(3) << "'\n";
+    // assert(TestSegmentedLiteral.nth(2) == "Copyright Daniel McRobb 2025");
 
   //  std::cout << TestSegmentedLiteral.view() << '\n';
   

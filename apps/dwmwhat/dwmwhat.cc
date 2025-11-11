@@ -49,9 +49,9 @@ extern "C" {
 
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <regex>
 #include <vector>
-#include <utility>  // for std::pair
 
 #include "DwmPkg.hh"
 
@@ -68,6 +68,193 @@ namespace Crap {
 
 #define DWMWHAT_COPYRIGHT  "Daniel McRobb 2025 " DWM_PKG_SYM_JACKOLANTERN \
   DWM_PKG_SYM_GHOST " "
+
+//  The lower level map maps the raw string to its JSON string.
+//  The top level map just has two keys: "pkgs" and "others"
+using PkgMap = map<string,map<string,string>>;
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static std::string MapToJson(std::map<std::string,std::string> & result)
+{
+  std::string  rc("{");
+  std::string  comma;
+  
+  for (const auto & field : result) {
+    rc += comma + " ";
+    rc += "\"" + field.first + "\": \"" + field.second + "\"";
+    comma = ",";
+  }
+  rc += " }";
+  return rc;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static bool ParseAsDwmPkgInfo(const std::string & v,
+                              std::map<std::string,std::string> & result)
+{
+  bool  rc = false;
+  const static std::string  pkgTypes("(" DWM_PKG_TYPE_HDR
+                                     "|" DWM_PKG_TYPE_LIB
+                                     "|" DWM_PKG_TYPE_EXE
+                                     "|" DWM_PKG_TYPE_DOC ")");
+  static const std::string  pkgStatus("(" DWM_PKG_STATUS_DEV
+                                      "|" DWM_PKG_STATUS_RC
+                                      "|" DWM_PKG_STATUS_REL ")");
+  static const std::string  pkgDate("((Jan|Feb|Mar|Apr|May|Jun"
+                                    "|Jul|Aug|Sep|Oct|Nov|Dec)"
+                                    " [ 123][0-9] [0-9][0-9][0-9][0-9])");
+
+  static const std::string  rgxstr("\\@\\(#\\)[ ]+" + pkgTypes + " "
+                                   + pkgStatus
+                                   + " (.+)"                 // pkg name
+                                   + " (.+)"                 // pkg version
+                                   + " (" DWM_PKG_SYM_COPYRIGHT ")"
+                                   + " (.+) "                // copyright
+                                   + pkgDate + " "           // date
+                                   + DWM_PKG_SYM_OTHER
+                                   // + " (.*)\\0");            // other
+                                   + " (.*)");               // other
+  static const std::regex
+    rgx(rgxstr,std::regex::ECMAScript|std::regex::optimize);
+  std::smatch sm;
+  if (std::regex_match(v, sm, rgx)) {
+    if (sm.size() == 10) {
+      result.clear();
+      result["type"] = sm[1].str();
+      result["status"] = sm[2].str();
+      result["name"] = sm[3].str();
+      result["version"] = sm[4].str();
+      result["copyright"] = sm[6].str();
+      result["date"] = sm[7].str();
+      result["other"] = sm[9].str();
+      rc = true;
+    }
+  }
+  return rc;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static string OtherToJson(const string & other)
+{
+  return string("{ \"id\": \"" + other + "\" }");
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void GetPkgMap(const vector<string> & vs, PkgMap & pkgMap)
+{
+  pkgMap.clear();
+  map<string,string>  infoMap;
+  for (const auto & s : vs) {
+    if (ParseAsDwmPkgInfo(s, infoMap)) {
+      pkgMap["pkgs"][s] = MapToJson(infoMap);
+    }
+    else {
+      pkgMap["others"][s] = OtherToJson(s);
+    }
+  }
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static void PrintPackages(const PkgMap & pkgMap, bool showJson)
+{
+  if (! showJson) {
+    auto it = pkgMap.find("pkgs");
+    if (it != pkgMap.end()) {
+      for (const auto & pkg : it->second) {
+        std::cout << pkg.first << '\n';
+      }
+    }
+    it = pkgMap.find("others");
+    if (it != pkgMap.end()) {
+      for (const auto & pkg : it->second) {
+        std::cout << pkg.first << '\n';
+      }
+    }
+    return;
+  }
+
+  if (! pkgMap.empty()) {
+    cout << "{\n";
+    
+    auto it = pkgMap.find("pkgs");
+    if (it != pkgMap.end()) {
+      cout << "  \"pkgs\": [";
+      string  comma;
+      for (const auto pkg : it->second) {
+        std::cout << comma << "\n    " << pkg.second;
+        comma = ",";
+      }
+      cout << "\n  ]";
+    }
+    it = pkgMap.find("others");
+    if (it != pkgMap.end()) {
+      cout << ",\n  \"others\": [";
+      string comma;
+      for (const auto other : it->second) {
+        cout << comma << "\n    " << other.second;
+        comma = ",";
+      }
+      cout << "\n  ]";
+    }
+    cout << "\n}\n";
+  }
+  
+  return;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
+static string GetJson(const vector<string> & vs)
+{
+  vector<string>  pkgsJson, others;
+  map<string,string>  infoMap;
+  for (const auto & s : vs) {
+    if (ParseAsDwmPkgInfo(s, infoMap)) {
+      pkgsJson.push_back(MapToJson(infoMap));
+    }
+    else {
+      others.push_back(s);
+    }
+  }
+
+  string  rc;
+  if (pkgsJson.empty() && others.empty()) {  return rc; }
+  rc += "{\n";
+  if (! pkgsJson.empty()) {
+    rc += "  \"pkgs\": [";
+    std::string  comma;
+    for (const auto & pkg : pkgsJson) {
+      rc += comma + "\n";
+      rc += "      " + pkg;
+      comma = ",";
+    }
+    rc += "\n  ]";
+  }
+  if (! others.empty()) {
+    rc += ",  \n  \"others\": [";
+    std::string  comma;
+    for (const auto & pkg : others) {
+      rc += comma + "\n";
+      rc += "      { \"id\": \"" + pkg + "\" }";
+      comma = ",";
+    }
+    rc += "  \n  ]";
+  }
+  rc += "\n}\n";
+  return rc;
+}
 
 //----------------------------------------------------------------------------
 //!  
@@ -194,7 +381,7 @@ static void DumpPackagesPlain()
 //----------------------------------------------------------------------------
 static void Usage(const char *argv0)
 {
-  std::cerr << "Usage: " << argv0 << " [-v] files...\n";
+  std::cerr << "Usage: " << argv0 << " [-v|-V] [-j] files...\n";
   return;
 }
 
@@ -203,10 +390,13 @@ static void Usage(const char *argv0)
 //----------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
-  bool  showVersion = false, showVerbose = false;
+  bool  showVersion = false, showVerbose = false, showAsJson = false;
   int  optChar;
-  while ((optChar = getopt(argc, argv, "vV")) != -1) {
+  while ((optChar = getopt(argc, argv, "jvV")) != -1) {
     switch (optChar) {
+      case 'j':
+        showAsJson = true;
+        break;
       case 'v':
         showVersion = true;
         break;
@@ -247,9 +437,19 @@ int main(int argc, char *argv[])
     pair<char *,size_t>  mf = MapFile(argv[arg]);
     if (mf.first) {
       vector<string>  sccsStrings = FindSccsStrings(mf.first, mf.second);
-      for (auto sit : sccsStrings) {
-        LineMatch(sit);
+      PkgMap  pkgMap;
+      GetPkgMap(sccsStrings, pkgMap);
+      PrintPackages(pkgMap, showAsJson);
+#if 0
+      if (showAsJson) {
+        cout << GetJson(sccsStrings);
       }
+      else {
+        for (auto sit : sccsStrings) {
+          LineMatch(sit);
+        }
+      }
+#endif
       munmap(mf.first, mf.second);
     }
   }

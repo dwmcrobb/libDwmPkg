@@ -167,6 +167,10 @@ namespace Dwm {
       static const size_t sz =
         ((D - 1) * (sizeof...(Ns) - 1)) + ((Ns-1) + ...);
     };
+
+    template <std::size_t D, std::size_t ...Ns>
+    constexpr size_t SegmentedLiteralChars_v =
+      SegmentedLiteralChars<D,Ns...>::sz;
     
     //------------------------------------------------------------------------
     //!  Deduction guide.  This is critical, since we need to deduce DelimLen,
@@ -182,7 +186,8 @@ namespace Dwm {
     //------------------------------------------------------------------------
     template <std::size_t D, std::size_t ...Ns>
     SegmentedLiteral(const char (&delim)[D], const char (&...s)[Ns])
-    -> SegmentedLiteral<D-1,sizeof...(Ns), SegmentedLiteralChars<D,Ns...>::sz>;
+    // -> SegmentedLiteral<D-1,sizeof...(Ns), SegmentedLiteralChars<D,Ns...>::sz>;
+      -> SegmentedLiteral<D-1,sizeof...(Ns), SegmentedLiteralChars_v<D,Ns...>>;
     
   }  // namespace Pkg
 
