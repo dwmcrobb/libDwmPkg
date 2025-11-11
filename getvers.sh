@@ -21,11 +21,13 @@ SVN_TAG=""
 SVN_VERSION=""
 DWM_TAG=""
 DWM_VERSION=""
+DWM_STATUS='DWM_PKG_STATUS_DEV'
 
 DwmGetGitTag() {
     local gittag=`git describe --tags --dirty 2>/dev/null`
     if test -z "${gittag}"; then
 	GIT_TAG="${RELEASE_NAME}"
+	DWM_STATUS='DWM_PKG_STATUS_REL'
 	GIT_VERSION=`echo ${GIT_TAG} | cut -d'-' -f2`
     else
         dirty=`echo "${gittag}" | awk -F '-' '{ if (NF > 2) { print "dirty"; } }'`
@@ -76,7 +78,7 @@ DwmGetTag() {
 
 DwmGetTag libDwmPkg
 
-args=`getopt sv $*`
+args=`getopt svS $*`
 set -- $args
 for i; do
     case "$i" in
@@ -86,6 +88,10 @@ for i; do
 	    break;;
 	-v)
 	    echo "${DWM_VERSION}"
+	    exit 0
+	    break;;
+	-S)
+	    echo "${DWM_STATUS}"
 	    exit 0
 	    break;;
     esac

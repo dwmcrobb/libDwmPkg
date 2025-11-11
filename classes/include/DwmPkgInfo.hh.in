@@ -283,7 +283,7 @@ namespace Dwm {
     };
 
     inline constexpr const Info __attribute__((used))
-    info(DWM_PKG_TYPE_HDR, DWM_PKG_STATUS_REL, "libDwmPkg", "@DWM_VERSION@",
+    info(DWM_PKG_TYPE_HDR, @DWM_PKG_STATUS@, "libDwmPkg", "@DWM_VERSION@",
          "Daniel McRobb " DWM_PKG_SYM_GHOST, "mcplex.net");
     
   }  // namespace Pkg

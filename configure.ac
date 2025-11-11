@@ -87,6 +87,9 @@ AC_ARG_ENABLE([docs],[AS_HELP_STRING([--enable-docs],[build documentation])],
 	      [BUILD_DOCS="yes"], [])
 AC_SUBST(BUILD_DOCS)
 
+DWM_PKG_STATUS=`./getvers.sh -S`
+AC_SUBST(DWM_PKG_STATUS)
+
 AC_CONFIG_FILES([Makefile.vars packaging/libDwmPkg.pc
                  packaging/fbsd_manifest packaging/debcontrol doc/Doxyfile
 		 classes/include/DwmPkgInfo.hh])
