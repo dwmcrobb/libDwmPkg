@@ -33,6 +33,7 @@ DwmGetGitTag() {
         dirty=`echo "${gittag}" | awk -F '-' '{ if (NF > 2) { print "dirty"; } }'`
         if test -z "${dirty}"; then
 	    GIT_TAG="${gittag}"
+	    DWM_STATUS='DWM_PKG_STATUS_REL'
 	    GIT_VERSION=`echo "${gittag}" | awk -F '-' '{print $NF}'`
         else
 	    fakevers=`date +%Y%m%d`
