@@ -327,7 +327,7 @@ static auto GetPackages()
   auto pkgs = Dwm::Pkg::get_packages<^^Dwm>();
   std::ranges::sort(pkgs);
   auto u = std::ranges::unique(pkgs);
-  pkgs.erase(u.begin(),u.end());
+  pkgs.erase(u.begin(), u.end());
   return pkgs;
 }
 
@@ -422,7 +422,7 @@ int main(int argc, char *argv[])
                 << "]\n";
     }
     else {
-      std::cout << Dwm::Pkg::info.view() << '\n';
+      std::cout << Dwm::Pkg::info.data_view() << '\n';
     }
 #endif
     return 0;
