@@ -18,6 +18,8 @@ compiled code.
   and other Debian package platforms
 
 ## `class Dwm::Pkg::Info`
+This is the primary class template in the library, and normally the
+only type a user will instantiate from the library.
 
 ```cpp
 template <std::size_t P, std::size_t S, std::size_t N,
@@ -43,7 +45,8 @@ Typical usage for a library is to just add a single instance
 of a `Dwm::Pkg::Info` in a header file you expect to be included
 by users of your library.  It can be deep in a nested namespace,
 and of course shouldn't be in the top level global namespace.
-For example:
+For example, for version 1.0.0 of a library package "MyPackageName":
+
 ```
 namespace MyNamespace {
   namespace pkg {
@@ -63,6 +66,25 @@ Things of note here:
   away this instance when optimizing, even if no code uses it.  The
   whole idea is just to embed a useful string literal in output,
   regardless of whether or not the linked code accesses it.
+
+#### Constructor arguments, in order
+- **`pkgtype`**
+    > The type of the package.  See the supported package types below.
+- **`status`**
+    > The status of the package.  See the support package status choices
+    below.
+- **`name`**
+    > The name of the package.
+- **`version`**
+    > The version of the package.
+- **`cpyright`**
+    > The copyright holder (usually just your name).
+- **`other`**
+    > Any other package information.
+
+Note that all arguments are string literals.  The whole idea is to build
+a string literal underneath, at compile time, without using the
+preprocessor to assemble the string literal.
 
 #### Package types
 Package types are just string literals, but I provide macros for
