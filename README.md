@@ -37,6 +37,7 @@ public:
    constexpr std::string_view copyright() const noexcept;
    constexpr std::string_view date() const noexcept;
    constexpr std::string_view other() const noexcept;
+   constexpr std::string_view data_view() const noexcept;
    constexpr std::string_view view() const noexcept;
 };
 ```
@@ -48,11 +49,11 @@ and of course shouldn't be in the top level global namespace.
 For example, for version 1.0.0 of a library package "MyPackageName":
 
 ```
-namespace MyNamespace {
+namespace MyPackageName {
   namespace pkg {
     inline constexpr const Dwm::Pkg::Info __attribute__((used))
-       MyPackageInfo(DWM_PKG_TYPE_LIB, DWM_PKG_STATUS_REL,
-                     "MyPackageName", "1.0.0", "My Name", "other stuff");
+       info(DWM_PKG_TYPE_LIB, DWM_PKG_STATUS_REL, "MyPackageName",
+            "1.0.0", "My Name", "other stuff");
   }
 }
 ```
@@ -83,8 +84,8 @@ Things of note here:
     > Any other package information.
 
 Note that all arguments are string literals.  The whole idea is to build
-a string literal underneath, at compile time, without using the
-preprocessor to assemble the string literal.
+a string literal at compile time, without using the preprocessor to
+assemble the string literal.
 
 #### Package types
 Package types are just string literals, but I provide macros for
@@ -111,6 +112,23 @@ output from `dwmwhat` for embedded instances of `Dwm::Pkg::Info`.
     > An official release.
 
 ## `Dwm::Pkg::SegmentedLiteral`
+This class template is the more generic segmented string literal class
+template.  `Dwm::Pkg::Info` inherits from `Dwm::Pkg::SegmentedLiteral`.
+The idea here is to provide a means of constructing a contiguous
+string literal at compile time from N other string literals and a
+delimiter that is placed between each given string literal, without
+resorting to using the preprocessor.  In code that instantiates a
+`SegmentedLiteral`, the segments from which it was constructed are
+accessible via the `nth(std::size_t n)` member, where `n` is from 0 to
+`num_segments() - 1`.  A view of the entire constructed string literal
+is available via the `view()` member.
+
+The tricks to such a thing...
+- Passing the string literals as `const char (&)[N]` so we can use
+  template parameter deduction in the constructor to deduce the
+  size of the encapsulated character buffer.
+- a correct deduction guide.
+  
 
 ```cpp
 template <std::size_t DelimLen, std::size_t NumSegs, std::size_t NumChars>
