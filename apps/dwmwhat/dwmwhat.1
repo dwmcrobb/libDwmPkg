@@ -8,6 +8,7 @@
 .Nm
 .Op Fl v
 .Op Fl V
+.Op Fl j
 .Cm file(s)
 .Sh DESCRIPTION
 .Nm
@@ -21,16 +22,32 @@ Optional arguments:
 .It Fl v
 Print the version of
 .Xr dwmwhat 1 itself.
-.It Fl v
+.It Fl V
 Print the version of
 .Xr dwmwhat 1 itself, in JSON form.
+.It Fl j
+When searching files, use JSON output for found strings.  Strings
+from Dwm::Pkg::Info get special treatment (parsing).
 .El
 .Sh EXAMPLES
 View the version information for the installed version of
 .Xr dwmwhat 1 .
 .Bd -literal
 % dwmwhat `which dwmwhat`
-＃ libDwmPkg 👷 0.0.42©️ Daniel McRobb 2025 🎃👻 📆 Nov 10 2025 ▶ mcplex.net
+＃ ✅ libDwmPkg 0.0.2 ©️  Daniel McRobb 👻 Nov 11 2025  mcplex.net
+.Ed
+.Pp
+View the version information for the installed version of
+.Xr dwmwhat 1 in JSON form.
+.Bd -literal
+% dwmwhat -j `which dwmwhat`
+{
+  "pkgs": [
+    { "copyright": "Daniel McRobb 👻", "date": "Nov 11 2025",
+      "name": "libDwmPkg", "other": "mcplex.net", "status": "✅",
+      "type": "＃", "version": "0.0.3" }
+  ]
+}
 .Ed
 .Pp
 View the version information embedded in
