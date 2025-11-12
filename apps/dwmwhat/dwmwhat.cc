@@ -166,19 +166,32 @@ static void GetPkgMap(const vector<string> & vs, PkgMap & pkgMap)
 //----------------------------------------------------------------------------
 //!  
 //----------------------------------------------------------------------------
+static string StripSccsPrefix(const string & line)
+{
+  static regex replregx("^\\@\\(#\\) *", regex::ECMAScript|regex::optimize);
+  string  s(regex_replace(line, replregx, ""));
+  if (! s.empty()) {
+    return s;
+  }
+  return line;
+}
+
+//----------------------------------------------------------------------------
+//!  
+//----------------------------------------------------------------------------
 static void PrintPackages(const PkgMap & pkgMap, bool showJson)
 {
   if (! showJson) {
     auto it = pkgMap.find("pkgs");
     if (it != pkgMap.end()) {
       for (const auto & pkg : it->second) {
-        std::cout << pkg.first << '\n';
+        std::cout << StripSccsPrefix(pkg.first) << '\n';
       }
     }
     it = pkgMap.find("others");
     if (it != pkgMap.end()) {
       for (const auto & pkg : it->second) {
-        std::cout << pkg.first << '\n';
+        std::cout << StripSccsPrefix(pkg.first) << '\n';
       }
     }
     return;
@@ -254,23 +267,6 @@ static string GetJson(const vector<string> & vs)
   }
   rc += "\n}\n";
   return rc;
-}
-
-//----------------------------------------------------------------------------
-//!  
-//----------------------------------------------------------------------------
-static void LineMatch(const string & line)
-{
-  static regex lookrgx("^\\@\\(#\\).+", regex::ECMAScript|regex::optimize);
-  static regex replregx("^\\@\\(#\\) *", regex::ECMAScript|regex::optimize);
-  smatch  lookMatch;
-  if (regex_match(line, lookMatch, lookrgx)) {
-    string  s(regex_replace(lookMatch[0].str(), replregx, ""));
-    if (! s.empty()) {
-      cout << s << '\n';
-    }
-  }
-  return;
 }
 
 //----------------------------------------------------------------------------
@@ -440,16 +436,7 @@ int main(int argc, char *argv[])
       PkgMap  pkgMap;
       GetPkgMap(sccsStrings, pkgMap);
       PrintPackages(pkgMap, showAsJson);
-#if 0
-      if (showAsJson) {
-        cout << GetJson(sccsStrings);
-      }
-      else {
-        for (auto sit : sccsStrings) {
-          LineMatch(sit);
-        }
-      }
-#endif
+
       munmap(mf.first, mf.second);
     }
   }
