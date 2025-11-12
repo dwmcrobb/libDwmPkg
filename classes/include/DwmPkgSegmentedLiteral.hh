@@ -108,34 +108,35 @@ namespace Dwm {
         ((seglengths[si++] = Ns-1,
           it = std::ranges::copy_n(delim,D-1,it).out,
           it = std::ranges::copy_n(s,Ns-1,it).out), ...);
+        *it = '\0';
       }
       
       //----------------------------------------------------------------------
-      //!  
+      //!  Returns a view of the whole buffer, minus the terminating null.
       //----------------------------------------------------------------------
       consteval operator std::string_view () const noexcept
-      { return std::string_view(_buffer,size); }
+      { return std::string_view(_buffer,size-1); }
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Returns the buffer.
       //----------------------------------------------------------------------
       constexpr operator BufType () const noexcept
       { return _buffer; }
 
       //----------------------------------------------------------------------
-      //!  
+      //!  Returns a view of the whole buffer, minus the terminating null.
       //----------------------------------------------------------------------
       constexpr std::string_view view() const noexcept
-      { return std::string_view(_buffer,size); }
+      { return std::string_view(_buffer,size-1); }
         
       //----------------------------------------------------------------------
-      //!  
+      //!  Returns the number of segments in the buffer (1 or more).
       //----------------------------------------------------------------------
       constexpr std::size_t num_segments() const noexcept
       { return NumSegs; }
       
       //----------------------------------------------------------------------
-      //!  
+      //!  Returns a view of the nth segment.
       //----------------------------------------------------------------------
       constexpr std::string_view nth(std::size_t n) const noexcept
       {
@@ -146,7 +147,7 @@ namespace Dwm {
       }
       
       //----------------------------------------------------------------------
-      //!  
+      //!  Returns the size of the type used to hold segment lengths.
       //----------------------------------------------------------------------
       constexpr std::size_t size_of_seg_lengths() const noexcept
       { return sizeof(SegLenType); }
@@ -159,13 +160,14 @@ namespace Dwm {
     };
 
     //------------------------------------------------------------------------
-    //!  
+    //!  Just a helper to hold the number of characters we need for the
+    //!  buffer based on the template arguments.  We need space for N
+    //!  segments and N-1 delimiters.
     //------------------------------------------------------------------------
     template <std::size_t D, std::size_t ...Ns>
-    struct SegmentedLiteralChars
-    {
+    struct SegmentedLiteralChars {
       static const size_t sz =
-        ((D - 1) * (sizeof...(Ns) - 1)) + ((Ns-1) + ...);
+        ((D - 1) * (sizeof...(Ns) - 1)) + ((Ns-1) + ...) + 1;
     };
 
     template <std::size_t D, std::size_t ...Ns>
@@ -186,8 +188,7 @@ namespace Dwm {
     //------------------------------------------------------------------------
     template <std::size_t D, std::size_t ...Ns>
     SegmentedLiteral(const char (&delim)[D], const char (&...s)[Ns])
-    // -> SegmentedLiteral<D-1,sizeof...(Ns), SegmentedLiteralChars<D,Ns...>::sz>;
-      -> SegmentedLiteral<D-1,sizeof...(Ns), SegmentedLiteralChars_v<D,Ns...>>;
+      -> SegmentedLiteral<D-1,sizeof...(Ns),SegmentedLiteralChars_v<D,Ns...>>;
     
   }  // namespace Pkg
 

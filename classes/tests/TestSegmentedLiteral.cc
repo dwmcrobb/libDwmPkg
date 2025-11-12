@@ -60,29 +60,35 @@ int main(int argc, char *argv[])
   constexpr Dwm::Pkg::SegmentedLiteral  allEmpty("","","","");
   std::string_view  sv = allEmpty.view();
   assert(sv.size() == 0);
+  assert(sv == "");
   
-  constexpr Dwm::Pkg::SegmentedLiteral  justEnoughArgs("","");
-  assert(justEnoughArgs.view().size() == 0);
-
+  constexpr Dwm::Pkg::SegmentedLiteral  justEnoughArgs("","b");
+  assert(justEnoughArgs.view().size() == 1);
+  assert(justEnoughArgs.view() == "b");
+  
   constexpr Dwm::Pkg::SegmentedLiteral  delimsOnly(" ","","","");
   assert(delimsOnly.view().size() == 2);
   assert(delimsOnly.nth(0) == "");
   assert(delimsOnly.nth(1) == "");
   assert(delimsOnly.nth(2) == "");
-
+  assert(delimsOnly.view() == "  ");
+  
   constexpr Dwm::Pkg::SegmentedLiteral  emptyDelim("","abc","defg","hijkl");
   assert(emptyDelim.view().size()
          == strlen("abc") + strlen("defg") + strlen("hijkl"));
   assert(emptyDelim.nth(0) == "abc");
   assert(emptyDelim.nth(1) == "defg");
   assert(emptyDelim.nth(2) == "hijkl");
+  assert(emptyDelim.view() == "abcdefghijkl");
 
   assert(TestSegmentedLiteral.nth(0) == "@(#)");
   assert(TestSegmentedLiteral.nth(1) == "TestSegmentedLiteral");
-  std::cerr << "'" << TestSegmentedLiteral.nth(3) << "'\n";
-    // assert(TestSegmentedLiteral.nth(2) == "Copyright Daniel McRobb 2025");
-
-  //  std::cout << TestSegmentedLiteral.view() << '\n';
+  assert(TestSegmentedLiteral.nth(2) == "");
+  assert(TestSegmentedLiteral.nth(3) == "Copyright Daniel McRobb 2025");
+  assert(TestSegmentedLiteral.nth(4) == __DATE__);
+  assert(TestSegmentedLiteral.nth(5) == __TIME__);
+  assert(TestSegmentedLiteral.view() ==
+         "@(#) TestSegmentedLiteral  Copyright Daniel McRobb 2025 " __DATE__ " " __TIME__);
   
   return 0;
 }
