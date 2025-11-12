@@ -169,7 +169,7 @@ namespace Dwm {
                           && template_of(type_of(mem)) == T) {
               // vars.push_back({FQN<mem>(),std::string([:mem:].view())});
               vars.push_back({FQN<mem>(),
-                              {std::string([:mem:].view()),
+                              {std::string([:mem:].data_view()),
                                std::string([:mem:].as_json())}});
             }
           }
