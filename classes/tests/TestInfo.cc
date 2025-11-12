@@ -40,6 +40,7 @@
 //---------------------------------------------------------------------------
 
 #include <cassert>
+#include <iostream>
 #include <regex>
 
 #include "DwmPkgInfo.hh"
@@ -61,6 +62,7 @@ int main(int argc, char *argv[])
   assert(! Dwm::Pkg::info.version().empty());
   assert(! Dwm::Pkg::info.status().empty());
   assert(! Dwm::Pkg::info.copyright().empty());
+  assert(Dwm::Pkg::info.other() == "mcplex.net");
   
   assert(g_info1.type() == DWM_PKG_TYPE_HDR);
   assert(g_info1.status() == DWM_PKG_STATUS_RC);
@@ -81,9 +83,14 @@ int main(int argc, char *argv[])
   assert(maininfo1.copyright()
          == "Daniel McRobb " DWM_PKG_SYM_GHOST);
   assert(maininfo1.other() == DWM_PKG_SYM_RP_TRIANGLE " mcplex.net");
-
+  assert(maininfo1.data_view() ==
+         DWM_PKG_TYPE_EXE " " DWM_PKG_STATUS_DEV " maininfo1 1.0.0 "
+         DWM_PKG_SYM_COPYRIGHT " Daniel McRobb " DWM_PKG_SYM_GHOST " "
+         __DATE__ " " DWM_PKG_SYM_OTHER " "
+         DWM_PKG_SYM_RP_TRIANGLE " mcplex.net");
+  
   assert(maininfo1 != g_info1);
   assert(g_info1 < maininfo1);
-  
+
   return 0;
 }

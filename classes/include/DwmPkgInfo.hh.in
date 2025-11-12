@@ -107,7 +107,7 @@
 //----------------------------------------------------------------------------
 //!  Delimiter, which I'll likely remove and always use a fixed single space.
 //----------------------------------------------------------------------------
-#define DWM_PKG_DELIM ""
+#define DWM_PKG_DELIM " "
 
 //----------------------------------------------------------------------------
 //!  DWM_PKG_MK_LINE_ARG(__LINE__) can be used to get a string literal of
@@ -134,8 +134,25 @@ namespace Dwm {
     template <std::size_t P, std::size_t S, std::size_t N, std::size_t V,
               std::size_t C, std::size_t O>
     class Info
+      : public SegmentedLiteral<1,10,
+                                SegmentedLiteralChars_v<sizeof(DWM_PKG_DELIM),
+                                                        sizeof("@(#)"),P,S,
+                                                        N,V,
+                                                        sizeof(DWM_PKG_SYM_COPYRIGHT),
+                                                        C, sizeof(__DATE__),
+                                                        sizeof(DWM_PKG_SYM_OTHER),
+                                                        O>>
     {
     public:
+      using MyLiteral =
+        SegmentedLiteral<1,10,
+                         SegmentedLiteralChars_v<sizeof(DWM_PKG_DELIM),
+                                                 sizeof("@(#)"),P,S,
+                                                 N,V,
+                                                 sizeof(DWM_PKG_SYM_COPYRIGHT),
+                                                 C, sizeof(__DATE__),
+                                                 sizeof(DWM_PKG_SYM_OTHER),O>>;
+      
       //----------------------------------------------------------------------
       //!  Construct from a given package type @c pkgtype (see the
       //!  @c DWM_PKG_TYPE_* macros above), package @c status (see the
@@ -146,9 +163,9 @@ namespace Dwm {
       consteval Info(const char (&pkgtype)[P], const char (&status)[S],
                      const char (&name)[N], const char (&version)[V],
                      const char (&cpyright)[C], const char (&other)[O])
-          : _sl(" ", "@(#)", pkgtype, status, name, version,
-                DWM_PKG_SYM_COPYRIGHT, cpyright, __DATE__,
-                DWM_PKG_SYM_OTHER, other)
+          : MyLiteral(DWM_PKG_DELIM, "@(#)", pkgtype, status, name, version,
+                      DWM_PKG_SYM_COPYRIGHT, cpyright, __DATE__,
+                      DWM_PKG_SYM_OTHER, other)
       {}
 
       //----------------------------------------------------------------------
@@ -159,7 +176,7 @@ namespace Dwm {
       constexpr bool operator ==
       (const Info<PI,SI,NI,VI,CI,OI> & info) const noexcept
       {
-        return (view() == info.view());
+        return (this->view() == info.view());
       }
 
       //----------------------------------------------------------------------
@@ -170,50 +187,50 @@ namespace Dwm {
       constexpr bool operator <
       (const Info<PI,SI,NI,VI,CI,OI> & info) const noexcept
       {
-        return (view() < info.view());
+        return (this->view() < info.view());
       }
       
       //----------------------------------------------------------------------
       //!  Returns the package type.
       //----------------------------------------------------------------------
       constexpr std::string_view type() const noexcept
-      { return _sl.nth(1); }
+      { return this->nth(1); }
 
       //----------------------------------------------------------------------
       //!  Returns the package status.
       //----------------------------------------------------------------------
       constexpr std::string_view status() const noexcept
-      { return _sl.nth(2); }
+      { return this->nth(2); }
 
       //----------------------------------------------------------------------
       //!  Returns the package name.
       //----------------------------------------------------------------------
       constexpr std::string_view name() const noexcept
-      { return _sl.nth(3); }
+      { return this->nth(3); }
 
       //----------------------------------------------------------------------
       //!  Returns the package version.
       //----------------------------------------------------------------------
       constexpr std::string_view version() const noexcept
-      { return _sl.nth(4); }
+      { return this->nth(4); }
       
       //----------------------------------------------------------------------
       //!  Returns the package copyright.
       //----------------------------------------------------------------------
       constexpr std::string_view copyright() const noexcept
-      { return _sl.nth(6); }
+      { return this->nth(6); }
       
       //----------------------------------------------------------------------
       //!  Returns the date the object was compiled.
       //----------------------------------------------------------------------
       constexpr std::string_view date() const noexcept
-      { return _sl.nth(7); }
+      { return this->nth(7); }
 
       //----------------------------------------------------------------------
       //!  Returns the 'other' data.
       //----------------------------------------------------------------------
       constexpr std::string_view other() const noexcept
-      { return _sl.nth(9); }
+      { return this->nth(9); }
       
       //----------------------------------------------------------------------
       //!  Returns a string holding the package information in JSON format.
@@ -227,59 +244,22 @@ namespace Dwm {
           + "\", \"copyright\": \"" + std::string(copyright())
           + "\", \"date\": \"" + std::string(date())
           + "\", \"other\": \"" + std::string(other())
-          + "\", \"id\": \"" + std::string(_sl)
+          + "\", \"id\": \""
+          + std::string(this->view())
           + "\"}";
       }
-
-      //----------------------------------------------------------------------
-      //!  Returns a string_view of the whole underlying buffer.
-      //----------------------------------------------------------------------
-      consteval operator std::string_view () const noexcept
-      { return _sl; }
 
       //----------------------------------------------------------------------
       //!  Returns a view of the buffer from the start of the 'type' segment
       //!  to the end (skipping over the prefix).
       //----------------------------------------------------------------------
-      constexpr std::string_view view() const noexcept
+      constexpr std::string_view data_view() const noexcept
       {
-        return std::string_view(type().data(),
-                                _sl.view().size()
-                                - (type().data() - _sl.view().data()));
+        auto  slv = this->view();
+        std::size_t  len = slv.size() - (type().size() + 1);
+        return std::string_view(type().data(), len);
       }
-        
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      constexpr size_t size_of_seg_lens() const noexcept
-      { return _sl.size_of_seg_lengths(); }
 
-      //----------------------------------------------------------------------
-      //!  
-      //----------------------------------------------------------------------
-      constexpr size_t num_segments() const noexcept
-      { return _sl.num_segments(); }
-      
-    private:
-      template <std::size_t ...Sizes>
-      struct InfoLiteralChars {
-        static const std::size_t  sz = SegmentedLiteralChars_v<Sizes...>;
-      };
-      template <std::size_t ...Sizes>
-      static constexpr std::size_t InfoLiteralChars_v =
-        InfoLiteralChars<Sizes...>::sz;
-      
-      constexpr static auto calc_num_chars() {
-        //  The total chars we need is the sum of the chars for
-        //  the prefix, PkgType (P), status (S), name (N), version (V),
-        //  copyright symbol, copyright (C), date, other symbol and other (O).
-        return InfoLiteralChars_v<2,sizeof("@(#)"),P,S,N,V,
-                                  sizeof(DWM_PKG_SYM_COPYRIGHT),C,
-                                  sizeof(__DATE__),
-                                  sizeof(DWM_PKG_SYM_OTHER),O>;
-      };
-      
-      SegmentedLiteral<1,10,calc_num_chars()>  _sl;
     };
 
     inline constexpr const Info __attribute__((used))

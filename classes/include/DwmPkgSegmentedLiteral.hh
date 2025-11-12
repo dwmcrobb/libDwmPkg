@@ -152,7 +152,7 @@ namespace Dwm {
       constexpr std::size_t size_of_seg_lengths() const noexcept
       { return sizeof(SegLenType); }
 
-    private:
+    protected:
       char         _buffer[NumChars] {};
       std::size_t  size = NumChars;
       SegLenType   seglengths[NumSegs] {};
