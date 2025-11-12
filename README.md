@@ -3,6 +3,20 @@
 A small header-only C++ library for embedding package information in
 compiled code.
 
+## Platforms
+- macOS
+- FreeBSD
+- Ubuntu
+- Raspberry Pi OS
+
+## Requirements
+- [`dwm_gmk`](https://github.com/dwmcrobb/dwm_gmk) GNU make plugin
+- GNU make
+- [`mkfbsdmnfst`](https://github.com/dwmcrobb/mkfbsdmnfst) for FreeBSD
+  packaging
+- [`mkdebcontrol`](https://github.com/dwmcrobb/mkdebcontrol) for Ubuntu
+  and other Debian package platforms
+
 ## `class Dwm::Pkg::Info`
 
 ```cpp
@@ -25,12 +39,19 @@ public:
 };
 ```
 ### Usage
-
+Typical usage for a library is to just add a single instance
+of a `Dwm::Pkg::Info` in a header file you expect to be included
+by users of your library.  It can be deep in a nested namespace,
+and of course shouldn't be in the top level global namespace.
+For example:
 ```
-inline constexpr const Dwm::Pkg::Info __attribute__((used))
-   MyPackageInfo(DWM_PKG_TYPE_LIB, DWM_PKG_STATUS_REL,
-                 "MyPackageName", "1.0.0", "My Name", "other stuff");
-
+namespace MyNamespace {
+  namespace pkg {
+    inline constexpr const Dwm::Pkg::Info __attribute__((used))
+       MyPackageInfo(DWM_PKG_TYPE_LIB, DWM_PKG_STATUS_REL,
+                     "MyPackageName", "1.0.0", "My Name", "other stuff");
+  }
+}
 ```
 
 Things of note here:
@@ -85,19 +106,32 @@ public:
 ```
 
 ## dwmwhat
+dwmwhat searches one or more files for strings starting with @(#) and
+displays the strings on stdout, one per line.  It is similar to the old
+`what(1)` utility from SCCS.
+     
 ```
 % dwmwhat `which dwmwhat`
-@(#) ＃ ✅ libDwmPkg 0.0.2 ©️  Daniel McRobb 👻 Nov 11 2025  mcplex.net
+＃ ✅ libDwmPkg 0.0.3 ©️  Daniel McRobb 👻 Nov 11 2025  mcplex.net
 ```
 
 ```
-dwm@thrip:/% dwmwhat -j `which dwmwhat`
+% dwmwhat `which bash`
+Bash version 5.2.37(1) release GNU
+```
+
+It can also produce JSON output for the strings it finds.  If the
+strings came from instances of `Dwm::Pkg::Info`, they will be parsed
+and presented in decomposed form.
+
+```
+% dwmwhat -j `which dwmwhat`
 {
   "pkgs": [
     {
       "copyright": "Daniel McRobb 👻", "date": "Nov 11 2025",
       "name": "libDwmPkg", "other": "mcplex.net", "status": "✅",
-      "type": "＃", "version": "0.0.2"
+      "type": "＃", "version": "0.0.3"
     }
   ]
 }
